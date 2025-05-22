@@ -55,11 +55,11 @@ const Layout = ({
 							onClick={() => navigate(item.path)}
 							disabled={item.disabled}
 							className={cn(
-								"w-10 h-10 flex items-center justify-center rounded-full text-white text-2xl hover:bg-[#063552] focus:bg-[#063552] transition-all",
-								window.location.pathname === item.path && "bg-yellow-500",
+								"w-10 h-10 flex items-center justify-center rounded-full text-white text-2xl hover:bg-[#134b6e] focus:bg-[#134b6e] transition-all",
+								window.location.pathname === item.path && "bg-[#134b6e]",
 								!defaultDisabled && item.disabled && "hidden",
 								defaultDisabled && item.disabled
-									? "hover:bg-primary text-yellow-700 hover:text-yellow-700"
+									? "hover:bg-primary text-[#134b6e] hover:text-[#134b6e]"
 									: "hover:bg-none"
 							)}
 						>
