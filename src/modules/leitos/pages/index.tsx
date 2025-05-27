@@ -1,9 +1,14 @@
 import { Card } from "@components/ui/card";
 import { LeitoLayout } from "../components/layout";
-import { leitos } from "../mocks/leitos";
+import { indicadores, leitos } from "../mocks/leitos";
 import { useState } from "react";
 import { LeitoDialog } from "../components/leitoDialog";
 import { LeitoSelected } from "../types/leitoSelected";
+import { HeaderCard } from "../components/headerCard";
+import { DataTable } from "@components/dataTable";
+import { columnsLeitos } from "../components/leitosTableColumns";
+import { ActionButton } from "@components/types/ActionButton";
+import { ExternalLink } from "lucide-react";
 
 const LeitosPage = () => {
 	const [isOpenLeitoDialog, setIsOpenLeitoDialog] = useState(false);
@@ -11,17 +16,49 @@ const LeitosPage = () => {
 		{} as LeitoSelected
 	);
 
+	const actionButton: ActionButton[] = [
+		{
+			label: "Selecionar Leito",
+			icon: <ExternalLink size={20} />,
+			onClick: (row: LeitoSelected) => {
+				// localStorage.setItem(
+				// 	"@farmacias-selected-people",
+				// 	JSON.stringify({ ...row, convenio: convenio[0], nomeConvenio: convenio[1] })
+				// );
+				// navigate('/farmacias/selecao-beneficiario/triagem')
+			},
+		},
+	];
+
 	return (
 		<LeitoLayout>
 			<p className="font-semibold text-xl">Leitos</p>
 			<p className="text-slate-300">Gerencie os leitos aqui.</p>
-			<div className="w-full h-full grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
-				{leitos.map((leito) => (
+			<div className="flex justify-center mt-4">
+				<HeaderCard
+					loading={false}
+					cards={[
+						{
+							value: indicadores.livres,
+							label: "Leitos Disponíveis",
+						},
+						{
+							value: indicadores.ocupados,
+							label: "Leitos Ocupados",
+						},
+						{
+							value: indicadores.chamados_abertos,
+							label: "Chamados abertos",
+						},
+					]}
+				/>
+			</div>
+			<div className="w-full h-full p-8">
+				{/* {leitos.map((leito) => (
 					<Card
 						key={leito.leitoId}
-						className={`flex flex-row h-44 items-center justify-between p-4 rounded-lg shadow-md hover:cursor-pointer hover:scale-105 transition-all duration-200 ${
-							leito.ocupado ? "bg-red-500" : "bg-green-500"
-						}`}
+						className={`flex flex-row h-44 items-center justify-between p-4 rounded-lg shadow-md hover:cursor-pointer hover:scale-105 transition-all duration-200 ${leito.ocupado ? "bg-red-500" : "bg-green-500"
+							}`}
 						onClick={() => {
 							setLeitoSelected(leito);
 							setIsOpenLeitoDialog(true);
@@ -43,7 +80,12 @@ const LeitosPage = () => {
 							</div>
 						)}
 					</Card>
-				))}
+				))} */}
+				<DataTable
+					actions={actionButton}
+					columns={columnsLeitos}
+					data={leitos}
+				/>
 			</div>
 			{isOpenLeitoDialog && (
 				<LeitoDialog

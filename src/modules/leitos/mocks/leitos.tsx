@@ -55,4 +55,10 @@ const leitos: LeitoSelected[] = [
 	},
 ];
 
-export { leitos };
+const indicadores = {
+	livres: leitos.filter((leito) => !leito.ocupado).length,
+	ocupados: leitos.filter((leito) => leito.ocupado).length,
+	chamados_abertos: 0,
+}
+
+export { leitos, indicadores };

@@ -24,7 +24,7 @@ const ModulesDashboard = () => {
 			children: [
 				{
 					title: "Administrativo Web",
-					description: "Sessão para atendimento do paciente pelo médico.",
+					description: "Gerencie os usuários.",
 					path: "/administrativo-web",
 					// permissions: ,
 					disabled: true,

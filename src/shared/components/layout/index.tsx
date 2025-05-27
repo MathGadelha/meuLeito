@@ -33,14 +33,16 @@ const Layout = ({
 	return (
 		<div className="w-full h-screen flex">
 			<aside className="w-[5%] flex flex-col items-center gap-6 relative bg-primary transition-all">
-				<img src={Logo} alt="Logo" className="w-24 h-20 mt-2 mb-5" />
+				<div className="w-full h-[10%] flex items-center justify-center">
+					<img src={Logo} alt="Logo" className="w-24 mt-6 mb-5" />
+				</div>
 				<Tooltip side="right" text="Dashboard">
 					<button
 						onClick={() => navigate("/dashboard")}
 						className={cn(
 							"w-10 h-10 flex items-center justify-center rounded-full bg-secondary text-zinc-700 text-2xl hover:bg-[#063552] hover:text-zinc-900 focus:bg-[#063552] focus:text-white transition-all",
 							window.location.pathname === "/dashboard" &&
-								"bg-secondary text-white"
+							"bg-secondary text-white"
 						)}
 					>
 						<p className="text-slate-100">

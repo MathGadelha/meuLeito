@@ -40,7 +40,7 @@ const SidebarDrawer = ({ children, buttons }: Props) => {
 							<button
 								onClick={() => navigate("/dashboard")}
 								className={cn(
-									"w-[95%] px-4 py-2 flex items-center justify-center rounded-full bg-secondary text-zinc-700 hover:bg-purple-800 hover:text-white hover:-translate-y-1 focus:-translate-y-1 focus:bg-secondary focus:text-white transition-all"
+									"w-[95%] px-4 py-2 flex items-center justify-center rounded-full bg-secondary text-zinc-700 hover:bg-[#063552] hover:text-white hover:-translate-y-1 focus:-translate-y-1 focus:bg-secondary focus:text-white transition-all"
 								)}
 							>
 								<div className="flex items-center justify-center gap-2">
@@ -62,7 +62,7 @@ const SidebarDrawer = ({ children, buttons }: Props) => {
 											"w-[95%] px-4 py-2 flex items-center justify-between rounded-full text-white hover:bg-secondary hover:translate-x-2 focus:translate-x-2 focus:scale-105 transition-all",
 											window.location.pathname === path && "bg-secondary",
 											disabled &&
-												"hover:cursor-default text-white hover:bg-secondary hover:translate-x-0"
+											"hover:cursor-default text-white hover:bg-secondary hover:translate-x-0"
 										)}
 									>
 										<div className="flex items-center justify-start gap-4">
