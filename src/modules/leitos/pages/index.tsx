@@ -1,4 +1,3 @@
-import { Card } from "@components/ui/card";
 import { LeitoLayout } from "../components/layout";
 import { indicadores, leitos } from "../mocks/leitos";
 import { useState } from "react";
@@ -21,6 +20,8 @@ const LeitosPage = () => {
 			label: "Selecionar Leito",
 			icon: <ExternalLink size={20} />,
 			onClick: (row: LeitoSelected) => {
+				setLeitoSelected(row);
+				setIsOpenLeitoDialog(true);
 				// localStorage.setItem(
 				// 	"@farmacias-selected-people",
 				// 	JSON.stringify({ ...row, convenio: convenio[0], nomeConvenio: convenio[1] })
@@ -54,33 +55,6 @@ const LeitosPage = () => {
 				/>
 			</div>
 			<div className="w-full h-full p-8">
-				{/* {leitos.map((leito) => (
-					<Card
-						key={leito.leitoId}
-						className={`flex flex-row h-44 items-center justify-between p-4 rounded-lg shadow-md hover:cursor-pointer hover:scale-105 transition-all duration-200 ${leito.ocupado ? "bg-red-500" : "bg-green-500"
-							}`}
-						onClick={() => {
-							setLeitoSelected(leito);
-							setIsOpenLeitoDialog(true);
-						}}
-					>
-						<div>
-							<h2 className="text-white text-lg font-semibold">
-								{leito.leito}
-							</h2>
-							<p className="text-white">
-								{leito.ocupado ? "Ocupado" : "Disponível"}
-							</p>
-						</div>
-						{leito.ocupado && leito.paciente && (
-							<div className="flex flex-col bg-red-600 shadow-xl shadow-red-700 p-4 rounded-lg text-white">
-								<p>Paciente: {leito.paciente.nome}</p>
-								<p>Idade: {leito.paciente.idade} anos</p>
-								<p>Sexo: {leito.paciente.sexo}</p>
-							</div>
-						)}
-					</Card>
-				))} */}
 				<DataTable
 					actions={actionButton}
 					columns={columnsLeitos}
@@ -96,12 +70,6 @@ const LeitosPage = () => {
 			)}
 		</LeitoLayout>
 	);
-	// return (
-	// 	<div>
-	// 		<h1>Leitos Page</h1>
-	// 		<p>This is the Leitos page.</p>
-	// 	</div>
-	// );
 };
 
 export { LeitosPage };

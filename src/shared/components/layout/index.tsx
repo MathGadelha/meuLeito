@@ -4,7 +4,7 @@ import { cn } from "@components/lib/utils";
 import { Button } from "@components/ui/button";
 import { ScrollArea } from "@components/ui/scroll-area";
 import { SidebarButton } from "@customTypes/sidebarButton";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { MdOutlineLogout } from "react-icons/md";
 import { PiCaretRightBold } from "react-icons/pi";
 import { useNavigate } from "react-router-dom";
@@ -13,6 +13,7 @@ import { Breadcrumb } from "@components/types/Breadcrumb";
 import { Tooltip } from "@components/tooltip";
 import { Separator } from "@components/ui/separator";
 import { LuLayoutDashboard } from "react-icons/lu";
+import notification from "@assets/audios/simple-notification-152054.mp3";
 
 type Props = {
 	children: React.ReactNode;
@@ -30,8 +31,61 @@ const Layout = ({
 	const navigate = useNavigate();
 	const [isOpenDialog, setIsOpenDialog] = useState(false);
 
+	// estado da notificação
+	const [showNotification, setShowNotification] = useState(true);
+
+	// referencia para o som
+	const audioRef = useRef<HTMLAudioElement | null>(null);
+
+	useEffect(() => {
+		// Verifica se a notificação foi fechada anteriormente
+		const notificationClosed = localStorage.getItem("notificationClosed");
+
+		// Se a notificação foi fechada, não exibe novamente
+		if (notificationClosed) {
+			setShowNotification(false);
+		}
+
+		audioRef.current = new Audio(notification);
+		audioRef.current.volume = 0.5;
+
+		// Tocar som na hora que a notificação for exibida
+		if (showNotification && audioRef.current) {
+			audioRef.current.currentTime = 0;
+			audioRef.current.play().catch(() => {
+				// Tentei reproduzir o som ao abrir a notificação
+			});
+		}
+
+		return () => {
+			if (audioRef.current) {
+				audioRef.current.pause();
+				audioRef.current = null;
+			}
+		};
+	}, [showNotification]);
+
+	useEffect(() => {
+		if (!showNotification) return;
+
+		const interval = setInterval(() => {
+			if (audioRef.current) {
+				audioRef.current.currentTime = 0;
+				audioRef.current.play().catch(() => { });
+			}
+		}, 5000);
+
+		return () => clearInterval(interval);
+	}, [showNotification]);
+
+	const handleCloseNotification = () => {
+		// Armazena no localStorage que a notificação foi fechada
+		localStorage.setItem("notificationClosed", "true");
+		setShowNotification(false);
+	};
+
 	return (
-		<div className="w-full h-screen flex">
+		<div className="w-full h-screen flex relative">
 			<aside className="w-[5%] flex flex-col items-center gap-6 relative bg-primary transition-all">
 				<div className="w-full h-[10%] flex items-center justify-center">
 					<img src={Logo} alt="Logo" className="w-24 mt-6 mb-5" />
@@ -41,8 +95,7 @@ const Layout = ({
 						onClick={() => navigate("/dashboard")}
 						className={cn(
 							"w-10 h-10 flex items-center justify-center rounded-full bg-secondary text-zinc-700 text-2xl hover:bg-[#063552] hover:text-zinc-900 focus:bg-[#063552] focus:text-white transition-all",
-							window.location.pathname === "/dashboard" &&
-							"bg-secondary text-white"
+							window.location.pathname === "/dashboard" && "bg-secondary text-white"
 						)}
 					>
 						<p className="text-slate-100">
@@ -107,9 +160,7 @@ const Layout = ({
 									className="p-0 disabled:opacity-100"
 									onClick={() => navigate(item.path)}
 								>
-									<h2 className="text-2xl font-semibold text-white">
-										{item.label}
-									</h2>
+									<h2 className="text-2xl font-semibold text-white">{item.label}</h2>
 								</Button>
 							</div>
 						))}
@@ -124,6 +175,22 @@ const Layout = ({
 					isOpen={isOpenDialog}
 					onClose={() => setIsOpenDialog(false)}
 				/>
+			)}
+
+			{/* Exibe a notificação apenas se não foi fechada */}
+			{showNotification && (
+				<div
+					className="fixed bottom-7 right-7 z-50 rounded-3xl shadow-2xl border-[1px] border-primary p-4 flex flex-col items-center gap-4"
+					role="alert"
+				>
+					<p>Chamado para o leito 202</p>
+					<button
+						onClick={handleCloseNotification}
+						className="bg-primary w-full px-3 py-1 rounded transition text-white font-semibold flex items-center justify-center"
+					>
+						Confirmar
+					</button>
+				</div>
 			)}
 		</div>
 	);

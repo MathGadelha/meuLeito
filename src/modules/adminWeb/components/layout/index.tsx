@@ -1,7 +1,7 @@
 import { Layout } from "@components/layout";
 import { Breadcrumb } from "@components/types/Breadcrumb";
 import { ScrollArea } from "@components/ui/scroll-area";
-import { SideBarButtonsLeitos } from "@modules/leitos/mocks/sidebarButtons";
+import { SideBarButtonsAdministrador } from "@modules/adminWeb/mocks/sidebarButtons";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 
@@ -9,19 +9,19 @@ type Props = {
 	children: React.ReactNode;
 };
 
-const LeitoLayout = ({ children }: Props) => {
+const AdminWebLayout = ({ children }: Props) => {
 	const location = useLocation();
 
 	const [breadcrumbs, setBreadcrumbs] = useState<Breadcrumb[]>([
-		{ label: "Leitos", path: "/leitos" },
+		{ label: "Administrador Web", path: "/administrativo-web" },
 	]);
 
 	const handleBreadcrumbs = () => {
 		const currentPath = location.pathname;
 
-		if (currentPath === "/leitos") return;
+		if (currentPath === "/administrativo-web") return;
 
-		for (const { label, path } of SideBarButtonsLeitos) {
+		for (const { label, path } of SideBarButtonsAdministrador) {
 			if (
 				path === currentPath &&
 				!breadcrumbs.some((item) => item.label === label)
@@ -42,7 +42,7 @@ const LeitoLayout = ({ children }: Props) => {
 	return (
 		<Layout
 			breadcrumbs={breadcrumbs}
-			sidebarButton={SideBarButtonsLeitos}
+			sidebarButton={SideBarButtonsAdministrador}
 			defaultDisabled
 		>
 			<ScrollArea>{children}</ScrollArea>
@@ -50,4 +50,4 @@ const LeitoLayout = ({ children }: Props) => {
 	);
 };
 
-export { LeitoLayout };
+export { AdminWebLayout };
