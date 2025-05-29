@@ -25,7 +25,6 @@ import { PiDotsThreeVerticalBold } from "react-icons/pi";
 import { IPagination, Pagination } from "./pagination";
 import { DropdownMenu } from "@components/dropdownMenu";
 import { ActionButton } from "@components/types/ActionButton";
-import notFoundImg from "@assets/imgs/notFound.png";
 
 type DataTableProps<TData, TValue> = {
 	columns: ColumnDef<TData, TValue>[];
@@ -64,7 +63,6 @@ export function DataTable<TData, TValue>({
 		<>
 			{data.length === 0 ? (
 				<div className="flex flex-col justify-center items-center font-semibold h-96 bg-white">
-					<img className="w-60" src={notFoundImg} alt="Nenhum dado encontrado" />
 					Oops, parece que nenhum dado foi encontrado.
 				</div>
 			) : (
