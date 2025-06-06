@@ -1,7 +1,7 @@
-import { redirect } from "react-router-dom";
+// import { redirect } from "react-router-dom";
 
 const authLoader = () => {
-	const accessTokenStoraged = localStorage.getItem("@access_token");
+	// const accessTokenStoraged = localStorage.getItem("@access_token");
 	// if (!accessTokenStoraged) throw redirect("/");
 	return null;
 };

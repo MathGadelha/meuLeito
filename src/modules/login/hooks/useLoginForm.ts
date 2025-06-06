@@ -6,14 +6,14 @@ import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
-import { useUserContext } from "../../../shared/context/user/useUserContext";
+// import { useUserContext } from "../../../shared/context/user/useUserContext";
 import { LoginFormSchema } from "../schema/loginFormSchema";
 import { defaultValuesLogin } from "../schema/defaultValuesLogin";
-import { loginService } from "../services/login.service";
+// import { loginService } from "../services/login.service";
 
 function useLoginForm() {
 	const navigate = useNavigate();
-	const { user, userData, perfil } = useUserContext();
+	// const { user, userData, perfil } = useUserContext();
 	const [loading, setLoading] = useState(false);
 
 	const form = useForm<z.infer<typeof LoginFormSchema>>({
@@ -28,7 +28,8 @@ function useLoginForm() {
 		loading,
 		schema: LoginFormSchema,
 		onsubmit: form.handleSubmit((data) => {
-			loginSubmit(data);
+			// loginSubmit(data);
+			console.log(data);
 		}),
 		inputs: [
 			{
@@ -62,12 +63,13 @@ function useLoginForm() {
 		buttonLabel: "Continuar",
 	};
 
-	async function loginSubmit(data: z.infer<typeof LoginFormSchema>) {
-		const params = {
-			usuario: data.usuario,
-			senha: data.senha,
-			isWeb: true,
-		};
+	async function loginSubmit() {
+		// data: z.infer<typeof LoginFormSchema>
+		// const params = {
+		// 	usuario: data.usuario,
+		// 	senha: data.senha,
+		// 	isWeb: true,
+		// };
 		toast.loading("Realizando login...");
 		setLoading(true);
 		try {

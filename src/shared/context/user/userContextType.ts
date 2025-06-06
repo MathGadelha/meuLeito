@@ -1,5 +1,3 @@
-import { UserData } from "@modules/gestaoProfissionais/interfaces/userData";
-
 type UserContextType = {
 	user: {
 		value: string;
@@ -9,10 +7,10 @@ type UserContextType = {
 		value: string[];
 		set: React.Dispatch<string[]>;
 	};
-	userData: {
-		value: UserData;
-		set: React.Dispatch<UserData>;
-	};
+	// userData: {
+	// 	value: UserData;
+	// 	set: React.Dispatch<UserData>;
+	// };
 };
 
 export type { UserContextType };

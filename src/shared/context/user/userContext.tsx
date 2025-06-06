@@ -1,6 +1,6 @@
 import React, { createContext, useEffect, useState } from "react";
 import { UserContextType } from "./userContextType";
-import { UserData } from "@modules/gestaoProfissionais/interfaces/userData";
+// import { UserData } from "@modules/gestaoProfissionais/interfaces/userData";
 
 const UserContext = createContext<UserContextType>({} as UserContextType);
 
@@ -17,11 +17,11 @@ const UserContextProvider = ({ children }: { children: React.ReactNode }) => {
 		return JSON.parse(perfilLocalStorage);
 	});
 
-	const [userData, setUserData] = useState<UserData>(() => {
-		const userDataLocalStorage = localStorage.getItem("@user_data");
-		if (!userDataLocalStorage) return "";
-		return JSON.parse(userDataLocalStorage);
-	});
+	// const [userData, setUserData] = useState<UserData>(() => {
+	// 	const userDataLocalStorage = localStorage.getItem("@user_data");
+	// 	if (!userDataLocalStorage) return "";
+	// 	return JSON.parse(userDataLocalStorage);
+	// });
 
 	useEffect(() => {
 		if (user) {
@@ -44,10 +44,10 @@ const UserContextProvider = ({ children }: { children: React.ReactNode }) => {
 			value: perfil,
 			set: setPerfil,
 		},
-		userData: {
-			value: userData,
-			set: setUserData,
-		},
+		// userData: {
+		// 	value: userData,
+		// 	set: setUserData,
+		// },
 	};
 	return <UserContext.Provider value={values}>{children}</UserContext.Provider>;
 };

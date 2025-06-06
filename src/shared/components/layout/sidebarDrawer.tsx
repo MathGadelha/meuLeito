@@ -2,7 +2,7 @@ import logo from "@assets/imgs/logo.png";
 import { cn } from "@components/lib/utils";
 import { Separator } from "@components/ui/separator";
 import { PiArrowRight, PiCaretLeftBold } from "react-icons/pi";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
 	Sheet,
 	SheetClose,
