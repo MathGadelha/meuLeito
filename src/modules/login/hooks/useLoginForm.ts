@@ -28,8 +28,8 @@ function useLoginForm() {
 		loading,
 		schema: LoginFormSchema,
 		onsubmit: form.handleSubmit((data) => {
-			// loginSubmit(data);
-			console.log(data);
+			loginSubmit(data);
+			// console.log(data);
 		}),
 		inputs: [
 			{
@@ -63,7 +63,7 @@ function useLoginForm() {
 		buttonLabel: "Continuar",
 	};
 
-	async function loginSubmit() {
+	async function loginSubmit(data: z.infer<typeof LoginFormSchema>) {
 		// data: z.infer<typeof LoginFormSchema>
 		// const params = {
 		// 	usuario: data.usuario,
