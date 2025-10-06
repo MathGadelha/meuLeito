@@ -31,7 +31,7 @@ const SidebarDrawer = ({ children, buttons }: Props) => {
 		<div>
 			<Sheet modal={true}>
 				<SheetTrigger asChild>{children}</SheetTrigger>
-				<SheetContent side="left" className="bg-primary text-white">
+				<SheetContent side="left" className="bg-primary border-none text-white">
 					<SheetHeader className="overflow-y-auto h-full overflow-x-hidden">
 						<SheetTitle className="flex justify-center items-center">
 							<img src={logo} alt="Logo" className="w-36 mt-2 mb-5" />

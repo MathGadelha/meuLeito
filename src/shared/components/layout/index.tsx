@@ -14,6 +14,7 @@ import { Tooltip } from "@components/tooltip";
 import { Separator } from "@components/ui/separator";
 import { LuLayoutDashboard } from "react-icons/lu";
 import notification from "@assets/audios/simple-notification-152054.mp3";
+import { FaCheck } from "react-icons/fa6";
 
 type Props = {
 	children: React.ReactNode;
@@ -39,12 +40,12 @@ const Layout = ({
 
 	useEffect(() => {
 		// Verifica se a notificação foi fechada anteriormente
-		const notificationClosed = localStorage.getItem("notificationClosed");
+		// const notificationClosed = localStorage.getItem("notificationClosed");
 
 		// Se a notificação foi fechada, não exibe novamente
-		if (notificationClosed) {
-			setShowNotification(false);
-		}
+		// if (notificationClosed) {
+		// 	setShowNotification(false);
+		// }
 
 		audioRef.current = new Audio(notification);
 		audioRef.current.volume = 0.5;
@@ -180,16 +181,26 @@ const Layout = ({
 			{/* Exibe a notificação apenas se não foi fechada */}
 			{showNotification && (
 				<div
-					className="fixed bottom-7 right-7 z-50 rounded-3xl shadow-2xl border-[1px] border-primary p-4 flex flex-col items-center gap-4"
+					className="fixed bottom-7 right-7 z-50 bg-white rounded-3xl shadow-2xl border-[1px] border-primary flex flex-col items-center gap-4"
 					role="alert"
 				>
-					<p>Chamado para o leito 202</p>
-					<button
-						onClick={handleCloseNotification}
-						className="bg-primary w-full px-3 py-1 rounded transition text-white font-semibold flex items-center justify-center"
-					>
-						Confirmar
-					</button>
+					<div className="flex flex-row justify-start items-center gap-4 py-2 px-4">
+						<img src={Logo} alt="Logo" className="w-24 mt-2 mb-2" />
+						<div className="">
+							<p>Leito 202</p>
+							<p>Solicitado as 14:30</p>
+							<p>Observação: </p>
+							<p>Paciente em estado crítico</p>
+						</div>
+						<button
+							onClick={handleCloseNotification}
+							className="bg-primary w-10 h-10 px-3 py-1 rounded transition text-white font-semibold flex items-center justify-center"
+						>
+							<FaCheck />
+						</button>
+					</div>
+
+
 				</div>
 			)}
 		</div>

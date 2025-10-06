@@ -1,8 +1,9 @@
-import { Button } from "@components/ui/button";
-import { Calendar, User, ClipboardCheck, Bell, PhoneCall } from "lucide-react";
+import { PhoneCall } from "lucide-react";
+import { SlCallOut } from "react-icons/sl";
 import { useState } from "react";
 import { ObservationDialog } from "../components/observationDialog";
 import toast from "react-hot-toast";
+import { MdOutlineRestaurantMenu } from "react-icons/md";
 
 const PacientesPage = () => {
 
@@ -28,32 +29,32 @@ const PacientesPage = () => {
                     </p>
                     <p className="mt-2 text-sm text-gray-500">Última chamado aberto: 22/09/2025 21:35</p>
                 </section>
-
                 <section>
                     <h2 className="text-lg font-semibold text-gray-700 mb-4">Central de Atendimento</h2>
 
                     <div className="grid grid-cols-2 gap-4">
-                        <Button
-                            variant="outline"
-                            size="lg"
-                            className="flex flex-col items-center justify-center gap-1 rounded-lg shadow-md p-6 bg-white hover:bg-gray-50"
+                        <button
+                            className="flex flex-row items-center bg-indigo-600 justify-center gap-1 rounded-lg shadow-md p-6 text-white"
                             onClick={() => alert("Abrir rotina hospitalar")}
                         >
-                            <Calendar className="w-10 h-10 text-indigo-600" />
-                            <span className="text-indigo-700 font-semibold">Rotina</span>
-                            <small className="text-gray-400">Ver rotina hospitalar</small>
-                        </Button>
+                            <MdOutlineRestaurantMenu className="w-10 h-10" />
+                            <div className="flex flex-col items-center">
+                                <span>Rotina</span>
+                                <small>Ver rotina hospitalar</small>
+                            </div>
 
-                        <Button
-                            variant="outline"
-                            size="lg"
-                            className="flex flex-col items-center justify-center gap-1 rounded-lg shadow-md p-6 bg-white hover:bg-gray-50"
+                        </button>
+
+                        <button
+                            className="flex flex-row items-center justify-center gap-1 rounded-lg shadow-md p-6 bg-green-600 hover:bg-green-700 text-white"
                             onClick={() => setOpenObservations(true)}
                         >
-                            <User className="w-10 h-10 text-green-600" />
-                            <span className="text-green-700 font-semibold">Chamar Enfermeira</span>
-                            <small className="text-gray-400">Solicitar auxílio imediato</small>
-                        </Button>
+                            <SlCallOut className="w-10 h-10" />
+                            <div className="flex flex-col items-center">
+                                <span>Chamar Enfermeira</span>
+                                <small>Solicitar auxílio imediato</small>
+                            </div>
+                        </button>
                     </div>
                 </section>
 
@@ -69,17 +70,19 @@ const PacientesPage = () => {
             <footer className="bg-white shadow-inner p-4 text-center text-gray-500 text-sm">
                 © 2025 - Meu Leito
             </footer>
-            {openObservations && (
-                <ObservationDialog
-                    isOpen={openObservations}
-                    onOpenChange={setOpenObservations}
-                    success={() => {
-                        setOpenObservations(false);
-                        toast.success("Chamado enviado com sucesso!");
-                    }}
-                />
-            )}
-        </div>
+            {
+                openObservations && (
+                    <ObservationDialog
+                        isOpen={openObservations}
+                        onOpenChange={setOpenObservations}
+                        success={() => {
+                            setOpenObservations(false);
+                            toast.success("Chamado enviado com sucesso!");
+                        }}
+                    />
+                )
+            }
+        </div >
     );
 };
 

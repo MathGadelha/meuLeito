@@ -17,6 +17,7 @@ const leitos: LeitoSelected[] = [
 			idade: "25",
 			sexo: "Masculino",
 		},
+		chamados: 2,
 	},
 	{
 		label: "203",
@@ -28,6 +29,7 @@ const leitos: LeitoSelected[] = [
 			idade: "28",
 			sexo: "Masculino",
 		},
+		chamados: 1,
 	},
 	{
 		label: "204",

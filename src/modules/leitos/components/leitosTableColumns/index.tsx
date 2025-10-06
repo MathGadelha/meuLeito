@@ -32,6 +32,16 @@ const columnsLeitos: ColumnDef<LeitoSelected>[] = [
             );
         },
     },
+    {
+        accessorKey: "chamados",
+        header: "Chamados",
+        cell: ({ row }) => {
+            const value = row.original.chamados || 0;
+            return (
+                <p>{value}</p>
+            );
+        },
+    },
 ];
 
 export { columnsLeitos };
