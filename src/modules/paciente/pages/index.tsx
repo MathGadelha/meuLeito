@@ -1,7 +1,13 @@
 import { Button } from "@components/ui/button";
 import { Calendar, User, ClipboardCheck, Bell, PhoneCall } from "lucide-react";
+import { useState } from "react";
+import { ObservationDialog } from "../components/observationDialog";
+import toast from "react-hot-toast";
 
 const PacientesPage = () => {
+
+    const [openObservations, setOpenObservations] = useState(false);
+
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col">
             <header className="bg-white shadow-md p-4 flex items-center justify-between">
@@ -16,11 +22,11 @@ const PacientesPage = () => {
 
             <main className="flex-1 p-6 space-y-6">
                 <section className="bg-white rounded-lg shadow p-4">
-                    <h2 className="text-lg font-semibold text-gray-700 mb-2">Status Atual</h2>
+                    <h2 className="text-lg font-semibold text-gray-700 mb-2">Último chamado</h2>
                     <p className="text-gray-600">
-                        Monitoramento estável, sinais vitais dentro dos parâmetros normais.
+                        Observação: nenhuma
                     </p>
-                    <p className="mt-2 text-sm text-gray-500">Última atualização: 27/05/2025 14:35</p>
+                    <p className="mt-2 text-sm text-gray-500">Última chamado aberto: 22/09/2025 21:35</p>
                 </section>
 
                 <section>
@@ -42,33 +48,11 @@ const PacientesPage = () => {
                             variant="outline"
                             size="lg"
                             className="flex flex-col items-center justify-center gap-1 rounded-lg shadow-md p-6 bg-white hover:bg-gray-50"
-                            onClick={() => alert("Chamando enfermeira")}
+                            onClick={() => setOpenObservations(true)}
                         >
                             <User className="w-10 h-10 text-green-600" />
                             <span className="text-green-700 font-semibold">Chamar Enfermeira</span>
                             <small className="text-gray-400">Solicitar auxílio imediato</small>
-                        </Button>
-
-                        <Button
-                            variant="outline"
-                            size="lg"
-                            className="flex flex-col items-center justify-center gap-1 rounded-lg shadow-md p-6 bg-white hover:bg-gray-50"
-                            onClick={() => alert("Acompanhando medicações")}
-                        >
-                            <ClipboardCheck className="w-10 h-10 text-yellow-600" />
-                            <span className="text-yellow-700 font-semibold">Medicações</span>
-                            <small className="text-gray-400">Controle e horários</small>
-                        </Button>
-
-                        <Button
-                            variant="outline"
-                            size="lg"
-                            className="flex flex-col items-center justify-center gap-1 rounded-lg shadow-md p-6 bg-white hover:bg-gray-50"
-                            onClick={() => alert("Visualizar notificações")}
-                        >
-                            <Bell className="w-10 h-10 text-red-600" />
-                            <span className="text-red-700 font-semibold">Notificações</span>
-                            <small className="text-gray-400">Avisos importantes</small>
                         </Button>
                     </div>
                 </section>
@@ -85,6 +69,16 @@ const PacientesPage = () => {
             <footer className="bg-white shadow-inner p-4 text-center text-gray-500 text-sm">
                 © 2025 - Meu Leito
             </footer>
+            {openObservations && (
+                <ObservationDialog
+                    isOpen={openObservations}
+                    onOpenChange={setOpenObservations}
+                    success={() => {
+                        setOpenObservations(false);
+                        toast.success("Chamado enviado com sucesso!");
+                    }}
+                />
+            )}
         </div>
     );
 };
