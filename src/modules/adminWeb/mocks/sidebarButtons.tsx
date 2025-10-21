@@ -2,6 +2,7 @@ import { SidebarButton } from "@shared/types/sidebarButton";
 import { FaPeopleGroup } from "react-icons/fa6";
 import { LuClipboardEdit } from "react-icons/lu";
 import { MdOutlineRestaurantMenu } from "react-icons/md";
+import { IoQrCodeOutline } from "react-icons/io5";
 
 const SideBarButtonsAdministrador: SidebarButton[] = [
 	{
@@ -21,6 +22,12 @@ const SideBarButtonsAdministrador: SidebarButton[] = [
 		path: "/administrativo-web/rotinas",
 		disabled: false,
 		icon: <MdOutlineRestaurantMenu />,
+	},
+	{
+		label: "Gerador de QR Code",
+		path: "/administrativo-web/qr-code",
+		disabled: false,
+		icon: <IoQrCodeOutline />,
 	},
 ];
 

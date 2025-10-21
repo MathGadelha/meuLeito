@@ -9,6 +9,7 @@ import { z } from "zod";
 // import { useUserContext } from "../../../shared/context/user/useUserContext";
 import { LoginFormSchema } from "../schema/loginFormSchema";
 import { defaultValuesLogin } from "../schema/defaultValuesLogin";
+import { loginService } from "../services/login.service";
 // import { loginService } from "../services/login.service";
 
 function useLoginForm() {
@@ -73,17 +74,15 @@ function useLoginForm() {
 		toast.loading("Realizando login...");
 		setLoading(true);
 		try {
-			// const response = await loginService.execute(params);
-			// localStorage.setItem("@access_token", response.accessToken);
-			// localStorage.setItem("@id", JSON.stringify(response.id));
-			// localStorage.setItem("@perfil", JSON.stringify(response.perfil));
+			const params = {
+				usuario: data.usuario,
+				senha: data.senha,
+			};
+			const response = await loginService.execute(params);
+			localStorage.setItem("@access_token", response.token);
 			// userData.set(response);
 			// perfil.set(response.perfil);
 			// user.set(response.usuario);
-
-			// if (data.remember) {
-			// 	localStorage.setItem("@refresh_token", response.refreshToken);
-			// }
 			toast.success("Login realizado com sucesso!");
 			navigate("/dashboard");
 		} catch (error) {

@@ -1,24 +1,9 @@
+import { userData } from "@modules/adminWeb/services/getPessoas/listPessoas.dto";
 import { usuariosData } from "@modules/adminWeb/types/usuarios.dto";
 // import { LeitoSelected } from "@modules/leitos/types/leitoSelected";
 import { ColumnDef } from "@tanstack/react-table";
 
-const columnsUsuarios: ColumnDef<usuariosData>[] = [
-	{
-		accessorKey: "usuario",
-		header: "Usuário",
-		cell: ({ row }) => {
-			const value = row.original.usuario;
-			return <p>{value}</p>;
-		},
-	},
-	{
-		accessorKey: "email",
-		header: "Email",
-		cell: ({ row }) => {
-			const value = row.original.email;
-			return <p>{value}</p>;
-		},
-	},
+const columnsPacientes: ColumnDef<userData>[] = [
 	{
 		accessorKey: "dataNascimento",
 		header: "Data de Nascimento",
@@ -43,4 +28,4 @@ const columnsUsuarios: ColumnDef<usuariosData>[] = [
 	},
 ];
 
-export { columnsUsuarios };
+export { columnsPacientes };

@@ -25,8 +25,8 @@ const RotinasPage = () => {
 
     return (
         <AdminWebLayout>
-            <p className="font-semibold text-xl">Acompanhamento de profissionais</p>
-            <p className="text-slate-300">Acompanhe o desempenho dos profissionais aqui.</p>
+            <p className="font-semibold text-xl">Gerenciamento de rotinas</p>
+            <p className="text-slate-300">Gerencie as rotinas aqui.</p>
             <div>
                 <DataTable
                     actionButtons={actionButton}
