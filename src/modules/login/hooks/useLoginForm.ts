@@ -9,7 +9,7 @@ import { z } from "zod";
 // import { useUserContext } from "../../../shared/context/user/useUserContext";
 import { LoginFormSchema } from "../schema/loginFormSchema";
 import { defaultValuesLogin } from "../schema/defaultValuesLogin";
-import { loginService } from "../services/login.service";
+// import { loginService } from "../services/login.service";
 // import { loginService } from "../services/login.service";
 
 function useLoginForm() {
@@ -29,8 +29,8 @@ function useLoginForm() {
 		loading,
 		schema: LoginFormSchema,
 		onsubmit: form.handleSubmit((data) => {
-			loginSubmit(data);
-			// console.log(data);
+			loginSubmit();
+			console.log(data);
 		}),
 		inputs: [
 			{
@@ -64,7 +64,7 @@ function useLoginForm() {
 		buttonLabel: "Continuar",
 	};
 
-	async function loginSubmit(data: z.infer<typeof LoginFormSchema>) {
+	async function loginSubmit() {
 		// data: z.infer<typeof LoginFormSchema>
 		// const params = {
 		// 	usuario: data.usuario,
@@ -74,12 +74,12 @@ function useLoginForm() {
 		toast.loading("Realizando login...");
 		setLoading(true);
 		try {
-			const params = {
-				usuario: data.usuario,
-				senha: data.senha,
-			};
-			const response = await loginService.execute(params);
-			localStorage.setItem("@access_token", response.token);
+			// const params = {
+			// 	usuario: data.usuario,
+			// 	senha: data.senha,
+			// };
+			// const response = await loginService.execute(params);
+			// localStorage.setItem("@access_token", response.token);
 			// userData.set(response);
 			// perfil.set(response.perfil);
 			// user.set(response.usuario);

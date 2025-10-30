@@ -2,7 +2,8 @@ import { SidebarButton } from "@shared/types/sidebarButton";
 import { FaPeopleGroup } from "react-icons/fa6";
 import { LuClipboardEdit } from "react-icons/lu";
 import { MdOutlineRestaurantMenu } from "react-icons/md";
-import { IoQrCodeOutline } from "react-icons/io5";
+// import { IoQrCodeOutline } from "react-icons/io5";
+import { FaAllergies, FaMapMarkerAlt } from "react-icons/fa";
 
 const SideBarButtonsAdministrador: SidebarButton[] = [
 	{
@@ -18,16 +19,16 @@ const SideBarButtonsAdministrador: SidebarButton[] = [
 		icon: <FaPeopleGroup />,
 	},
 	{
-		label: "Cadastro de rotinas",
-		path: "/administrativo-web/rotinas",
+		label: "Setores",
+		path: "/administrativo-web/setores",
 		disabled: false,
-		icon: <MdOutlineRestaurantMenu />,
+		icon: <FaMapMarkerAlt />,
 	},
 	{
-		label: "Gerador de QR Code",
-		path: "/administrativo-web/qr-code",
+		label: "Alergias e Comorbidades",
+		path: "/administrativo-web/alergias",
 		disabled: false,
-		icon: <IoQrCodeOutline />,
+		icon: <FaAllergies />,
 	},
 ];
 

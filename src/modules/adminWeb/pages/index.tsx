@@ -3,18 +3,18 @@ import { FormCadastro } from "../components/createUserForm";
 import { AdminWebLayout } from "../components/layout";
 import { DataTable } from "@components/dataTable";
 import { columnsPacientes } from "../components/pacientTableColumns";
-import { usuariosData } from "../types/usuarios.dto";
 import { Trash2, UserRoundPen } from "lucide-react";
 import { ActionButton } from "@components/types/ActionButton";
 import { useEffect, useState } from "react";
-import { UserDialog } from "../components/pacientDialog";
-import { ListPessoas } from "../services/getPessoas/listPessoas.service";
-import { userData } from "../services/getPessoas/listPessoas.dto";
+import { ListPacientes } from "../services/listPacientes/listPacientes.service";
+import { userData } from "../services/listPacientes/listPacientes.dto";
+import { PacienteDialog } from "../components/pacientDialog";
+
 
 const AdministradorPage = () => {
 	const [isOpenUserDialog, setIsOpenUserDialog] = useState(false);
-	const [usuarioSelected, setUsuarioSelected] = useState<usuariosData>(
-		{} as usuariosData
+	const [usuarioSelected, setUsuarioSelected] = useState<userData>(
+		{} as userData
 	);
 	const [pacientes, setPacientes] = useState<userData[]>([]);
 
@@ -22,7 +22,7 @@ const AdministradorPage = () => {
 		{
 			label: "Editar paciente",
 			icon: <UserRoundPen size={20} />,
-			onClick: (row: usuariosData) => {
+			onClick: (row: userData) => {
 				setIsOpenUserDialog(true);
 				setUsuarioSelected(row);
 				// localStorage.setItem(
@@ -35,7 +35,7 @@ const AdministradorPage = () => {
 		{
 			label: "Deletar paciente",
 			icon: <Trash2 size={20} color="red" />,
-			onClick: (row: usuariosData) => {
+			onClick: (row: userData) => {
 				setUsuarioSelected(row);
 				// localStorage.setItem(
 				// 	"@farmacias-selected-people",
@@ -47,10 +47,10 @@ const AdministradorPage = () => {
 	];
 
 
-	async function getPessoas() {
+	async function getPacientes() {
 		try {
 			const nome = "";
-			const response = await ListPessoas.execute(nome);
+			const response = await ListPacientes.execute(nome);
 			console.log(response)
 			setPacientes(response.data);
 		} catch (error) {
@@ -59,7 +59,7 @@ const AdministradorPage = () => {
 	}
 
 	useEffect(() => {
-		getPessoas();
+		getPacientes();
 	}, []);
 
 	return (
@@ -77,10 +77,11 @@ const AdministradorPage = () => {
 			</div>
 
 			{isOpenUserDialog && (
-				<UserDialog
+				<PacienteDialog
 					isOpen={isOpenUserDialog}
 					onOpenChange={() => setIsOpenUserDialog(false)}
-					usuarioSelected={usuarioSelected}
+					pacienteSelected={usuarioSelected}
+					onSend={() => { getPacientes(); setIsOpenUserDialog(false); }}
 				/>
 			)}
 		</AdminWebLayout>

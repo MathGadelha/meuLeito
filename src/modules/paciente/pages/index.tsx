@@ -1,13 +1,13 @@
 import { PhoneCall } from "lucide-react";
 import { SlCallOut } from "react-icons/sl";
-import { useState } from "react";
-import { ObservationDialog } from "../components/observationDialog";
-import toast from "react-hot-toast";
+// import { useState } from "react";
+// import { ObservationDialog } from "../components/observationDialog";
+// import toast from "react-hot-toast";
 import { MdOutlineRestaurantMenu } from "react-icons/md";
 
 const PacientesPage = () => {
 
-    const [openObservations, setOpenObservations] = useState(false);
+    // const [openObservations, setOpenObservations] = useState(false);
 
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -32,7 +32,7 @@ const PacientesPage = () => {
                 <section>
                     <h2 className="text-lg font-semibold text-gray-700 mb-4">Central de Atendimento</h2>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-rows-2 gap-4">
                         <button
                             className="flex flex-row items-center bg-indigo-600 justify-center gap-1 rounded-lg shadow-md p-6 text-white"
                             onClick={() => alert("Abrir rotina hospitalar")}
@@ -47,7 +47,7 @@ const PacientesPage = () => {
 
                         <button
                             className="flex flex-row items-center justify-center gap-1 rounded-lg shadow-md p-6 bg-green-600 hover:bg-green-700 text-white"
-                            onClick={() => setOpenObservations(true)}
+                            onClick={() => console.log(true)}
                         >
                             <SlCallOut className="w-10 h-10" />
                             <div className="flex flex-col items-center">
@@ -70,7 +70,7 @@ const PacientesPage = () => {
             <footer className="bg-white shadow-inner p-4 text-center text-gray-500 text-sm">
                 © 2025 - Meu Leito
             </footer>
-            {
+            {/* {
                 openObservations && (
                     <ObservationDialog
                         isOpen={openObservations}
@@ -81,7 +81,7 @@ const PacientesPage = () => {
                         }}
                     />
                 )
-            }
+            } */}
         </div >
     );
 };

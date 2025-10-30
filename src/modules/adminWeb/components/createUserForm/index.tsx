@@ -4,9 +4,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@components/ui/form";
 import { Button } from "@components/ui/button";
 import { Input } from "@components/ui/input";
-import { PessoasService } from "@modules/adminWeb/services/postPessoas/postPessoas.service";
-import { Select } from "@radix-ui/react-select";
-import { SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select";
+import { usePacienteService } from "@modules/adminWeb/services/postPaciente/postPaciente.service";
+import { errorHandler } from "@api/errorHandler";
 
 const formSchema = z.object({
     nome: z.string().min(2, "Nome obrigatório"),
@@ -34,15 +34,15 @@ const FormCadastro = () => {
 
     async function onSubmit(data: FormData) {
         try {
-            const pessoaBody = {
+            const params = {
                 nome: data.nome,
                 nascimento: data.dataNascimento,
                 sexo: data.sexo,
                 cpf: data.cpf
             }
-            await PessoasService.execute(pessoaBody)
+            await usePacienteService.execute(params)
         } catch (error) {
-            console.error("Erro ao criar usuário:", error);
+            errorHandler(error);
         }
     }
 
@@ -115,12 +115,9 @@ const FormCadastro = () => {
                         </FormItem>
                     )}
                 />
-                <div className="w-full flex justify-end mt-8">
+                <div className="w-full flex justify-end mt-8 col-span-2">
                     <Button type="submit" className="w-1/2">
                         Enviar
-                    </Button>
-                    <Button onClick={() => console.log(form.getValues())} className="w-1/2">
-                        Ver Valores
                     </Button>
                 </div>
 

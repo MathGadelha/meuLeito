@@ -4,24 +4,25 @@ import { Separator } from "@components/ui/separator";
 import { FormCadastro } from "@modules/adminWeb/components/createUserForm";
 import { AdminWebLayout } from "@modules/adminWeb/components/layout";
 import { UserDialog } from "@modules/adminWeb/components/pacientDialog";
-import { columnsUsuarios } from "@modules/adminWeb/components/pacientTableColumns";
-import { usuariosData } from "@modules/adminWeb/types/usuarios.dto";
+// import { columnsUsuarios } from "@modules/adminWeb/components/pacientTableColumns";
 import { Trash2, UserRoundPen } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { columnsUsuarios } from "../components/usersTableColumns";
+import { userData } from "@modules/adminWeb/services/getPessoas/listPessoas.dto";
 
 
 const UsuariosPage = () => {
     const [isOpenUserDialog, setIsOpenUserDialog] = useState(false);
-    const [usuarioSelected, setUsuarioSelected] = useState<usuariosData>(
-        {} as usuariosData
+    const [usuarioSelected, setUsuarioSelected] = useState<userData>(
+        {} as userData
     );
-    const [usuarios, setUsuarios] = useState<usuariosData[]>([]);
+    const [usuarios, setUsuarios] = useState<userData[]>([]);
 
     const actionButton: ActionButton[] = [
         {
             label: "Editar Usuário",
             icon: <UserRoundPen size={20} />,
-            onClick: (row: usuariosData) => {
+            onClick: (row: userData) => {
                 setIsOpenUserDialog(true);
                 setUsuarioSelected(row);
                 // localStorage.setItem(
@@ -34,7 +35,7 @@ const UsuariosPage = () => {
         {
             label: "Deletar Usuário",
             icon: <Trash2 size={20} color="red" />,
-            onClick: (row: usuariosData) => {
+            onClick: (row: userData) => {
                 setUsuarioSelected(row);
                 // localStorage.setItem(
                 // 	"@farmacias-selected-people",
@@ -57,9 +58,10 @@ const UsuariosPage = () => {
     //     }
     // }
 
-    // useEffect(() => {
-    //     getPessoas();
-    // }, []);
+    useEffect(() => {
+        setUsuarios([
+        ]);
+    }, []);
 
     return (
         <AdminWebLayout>

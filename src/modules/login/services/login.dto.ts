@@ -6,6 +6,7 @@ type LoginInputDto = {
 type LoginOutputDto = {
 	usuario: { id: number; login: string; role: string; };
 	token: string;
+	perfil: string[];
 };
 
 type Perfil = {

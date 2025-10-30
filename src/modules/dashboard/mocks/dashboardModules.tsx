@@ -34,6 +34,21 @@ const ModulesDashboard = () => {
 				},
 			],
 		},
+		{
+			context: "Admin Leitos",
+			children: [
+				{
+					title: "Admin Leitos",
+					description: "Adminitração de leitos e criação de Qr Code.",
+					path: "/admin-leitos",
+					// permissions: ,
+					disabled: true,
+					moduleAction: [],
+					assignedUsers: [],
+					icon: <LuClipboardEdit />,
+				},
+			],
+		},
 	];
 	return {
 		modules,
