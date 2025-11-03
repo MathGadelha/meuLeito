@@ -19,9 +19,11 @@ function QRGenerator() {
 
     const [leitos, setLeitos] = useState<leitosAdmin[]>([]);
     const [leitoSelected, setLeitoSelected] = useState<leitosAdmin | null>(null);
+    const [loading, setLoading] = useState(false);
 
     async function listLeitos() {
         try {
+            setLoading(true);
             const params = {
                 nome: "",
                 idSetor: undefined,
@@ -32,6 +34,8 @@ function QRGenerator() {
             setLeitos(response.data);
         } catch (error) {
             errorHandler(error);
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -129,12 +133,15 @@ function QRGenerator() {
                             ]}
                         /> */}
                         <div className="w-full grid grid-cols-4 gap-4">
-                            {
+                            {loading ? (
+                                <p>Loading...</p>
+                            ) : (
                                 leitos.map(leito => (
                                     <Card className="flex items-center justify-center p-4 hover:bg-slate-100 hover:cursor-pointer" key={leito.Id} onClick={() => setLeitoSelected(leito)}>
                                         <p>{leito.Nome}</p>
                                     </Card>
                                 ))
+                            )
                             }
                         </div>
                     </div>
@@ -145,7 +152,7 @@ function QRGenerator() {
                         <div style={{ display: "flex", gap: 24, flexWrap: "wrap", alignItems: "center", marginTop: 8 }}>
 
                             <div style={{ textAlign: "center" }}>
-                                {leitoSelected ? (<p>Gerando QR para o leito: <span className="font-bold">{leitoSelected.Nome}</span></p>) : <p>Selecione um leito para gerar o QR Code.</p>}
+                                {leitoSelected ? (<p>Gerando QR para o leito: <span className="font-bold">{leitoSelected.Nome}</span></p>) : leitos.length > 0 ? <p>Selecione um leito para gerar o QR Code.</p> : <p>Nenhum leito encontrado   .</p>}
                                 {leitoSelected && (
                                     <>
                                         <div className="mt-8">

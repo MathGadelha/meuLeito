@@ -1,7 +1,9 @@
+import { user } from "./userType";
+
 type UserContextType = {
 	user: {
-		value: string;
-		set: React.Dispatch<string>;
+		value: user;
+		set: React.Dispatch<user>;
 	};
 	perfil: {
 		value: string[];

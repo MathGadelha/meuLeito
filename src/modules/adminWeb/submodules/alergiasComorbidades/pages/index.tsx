@@ -25,10 +25,12 @@ const AlergiasComorbidadesPage = () => {
     const [tipoComorbidade, setTipoComorbidade] = useState<"C" | "E">("C");
     const [AlergiaSelected, setAlergiaSelected] = useState<alergiasData>();
     const [ComorbidadeSelected, setComorbidadeSelected] = useState<comorbidadesData>();
-    const [loading, setLoading] = useState(false);
+    const [loadingAlergias, setLoadingAlergias] = useState(false);
+    const [loadingComorbidades, setLoadingComorbidades] = useState(false);
     const [alergias, setAlergias] = useState<alergiasData[]>([]);
     const [comorbidades, setComorbidades] = useState<comorbidadesData[]>([]);
-
+    const [searchAlergias, setSearchAlergias] = useState<string>("");
+    const [searchComorbidade, setSearchComorbidade] = useState<string>("");
 
     const actionButtonAlergia: ActionButton[] = [
         {
@@ -56,33 +58,33 @@ const AlergiasComorbidadesPage = () => {
         },
     ];
 
-    async function listAlergias(search?: string) {
+    async function listAlergias() {
         try {
-            setLoading(true);
+            setLoadingAlergias(true);
             const params = {
-                nome: search,
+                nome: searchAlergias,
             }
             const result = await useGetAlergias.execute(params);
             setAlergias(result.data);
         } catch (error) {
             errorHandler(error);
         } finally {
-            setLoading(false);
+            setLoadingAlergias(false);
         }
     }
 
-    async function listComorbidades(search?: string) {
+    async function listComorbidades() {
         try {
-            setLoading(true);
+            setLoadingComorbidades(true);
             const params = {
-                nome: search,
+                nome: searchComorbidade,
             }
             const result = await useGetComorbidades.execute(params);
             setComorbidades(result.data);
         } catch (error) {
             errorHandler(error);
         } finally {
-            setLoading(false);
+            setLoadingComorbidades(false);
         }
     }
 
@@ -91,6 +93,23 @@ const AlergiasComorbidadesPage = () => {
         listComorbidades();
     }, [])
 
+    useEffect(() => {
+        const debounce = setTimeout(() => {
+            listAlergias();
+        }, 750);
+
+        return () => clearTimeout(debounce);
+    }, [searchAlergias])
+
+
+    useEffect(() => {
+        const debounce = setTimeout(() => {
+            listComorbidades();
+        }, 750);
+
+        return () => clearTimeout(debounce);
+    }, [searchComorbidade]);
+
     return (
         <AdminWebLayout>
             <p className="font-semibold text-xl">Gerenciamento de Alergias e Comorbidades</p>
@@ -98,19 +117,15 @@ const AlergiasComorbidadesPage = () => {
             <div className="flex flex-row w-full gap-4 mt-4">
                 <div className="w-1/2">
                     <p className="font-bold">Alergias</p>
-                    <div className="flex flex-row justify-between">
-                        <div className="flex items-center gap-2 mb-4 border rounded-lg w-1/4">
+                    <div className="flex flex-row justify-between gap-2">
+                        <div className="w-2/3 flex items-center gap-2 mb-4 border rounded-lg">
                             <Search size={20} className="ml-4" />
                             <Input
                                 className="w-full  border-none focus-visible:ring-0 focus-visible:ring-ring focus-visible:ring-offset-0"
                                 onChange={(e) => {
-                                    const debounce = setTimeout(() => {
-                                        listAlergias(e.target.value);
-                                    }, 750);
-
-                                    return () => clearTimeout(debounce);
+                                    setSearchAlergias(e.target.value);
                                 }}
-                                placeholder="Pesquise uma pessoa por nome"
+                                placeholder="Pesquise uma alergia por nome"
                             />
                         </div>
                         <Button className="bg-primary gap-2" onClick={() => {
@@ -125,24 +140,20 @@ const AlergiasComorbidadesPage = () => {
                         actions={actionButtonAlergia}
                         columns={columnsSetores}
                         data={alergias}
-                        isLoading={loading}
+                        isLoading={loadingAlergias}
                     />
                 </div>
                 <div className="w-1/2">
                     <p className="font-bold">Comorbidades</p>
-                    <div className="flex flex-row justify-between">
-                        <div className="flex items-center gap-2 mb-4 border rounded-lg w-1/4">
+                    <div className="flex flex-row justify-between gap-2">
+                        <div className="w-2/3 flex items-center gap-2 mb-4 border rounded-lg">
                             <Search size={20} className="ml-4" />
                             <Input
                                 className="w-full  border-none focus-visible:ring-0 focus-visible:ring-ring focus-visible:ring-offset-0"
                                 onChange={(e) => {
-                                    const debounce = setTimeout(() => {
-                                        listComorbidades(e.target.value);
-                                    }, 750);
-
-                                    return () => clearTimeout(debounce);
+                                    setSearchComorbidade(e.target.value);
                                 }}
-                                placeholder="Pesquise uma pessoa por nome"
+                                placeholder="Pesquise uma comorbidade por nome"
                             />
                         </div>
                         <Button className="bg-primary gap-2" onClick={() => {
@@ -157,7 +168,7 @@ const AlergiasComorbidadesPage = () => {
                         actions={actionButtonComorbidade}
                         columns={columnsSetores}
                         data={comorbidades}
-                        isLoading={loading}
+                        isLoading={loadingComorbidades}
                     />
                 </div>
             </div>

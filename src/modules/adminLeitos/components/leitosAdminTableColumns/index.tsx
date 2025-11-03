@@ -27,7 +27,7 @@ const columnsLeitosAdmin: ColumnDef<leitosAdmin>[] = [
         accessorKey: "setor",
         header: "Setor",
         cell: ({ row }) => {
-            const value = row.original.SetorNome;
+            const value = row.original.nome_setor;
             return (
                 <p>{value}</p>
             );

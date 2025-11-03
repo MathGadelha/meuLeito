@@ -5,7 +5,7 @@ type listPacientesOutput = {
 type userData = {
     Id: number,
     Nome: string,
-    Cpf: string,
+    CPF: string,
     Nascimento: string,
     Sexo: "M" | "F",
     Telefone: string | null,

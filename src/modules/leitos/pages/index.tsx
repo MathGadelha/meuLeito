@@ -1,6 +1,6 @@
 import { LeitoLayout } from "../components/layout";
 import { indicadores, leitos } from "../mocks/leitos";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LeitoDialog } from "../components/leitoDialog";
 import { LeitoSelected } from "../types/leitoSelected";
 import { HeaderCard } from "../components/headerCard";
@@ -8,18 +8,24 @@ import { DataTable } from "@components/dataTable";
 import { columnsLeitos } from "../components/leitosTableColumns";
 import { ActionButton } from "@components/types/ActionButton";
 import { ExternalLink } from "lucide-react";
+import { leitosAdmin } from "@modules/adminLeitos/services/getLeitos/getLeitos.dto";
+import { useGetLeitos } from "@modules/adminLeitos/services/getLeitos/getLeitos.service";
+import { errorHandler } from "@api/errorHandler";
 
 const LeitosPage = () => {
 	const [isOpenLeitoDialog, setIsOpenLeitoDialog] = useState(false);
-	const [leitoSelected, setLeitoSelected] = useState<LeitoSelected>(
-		{} as LeitoSelected
+	const [leitoSelected, setLeitoSelected] = useState<leitosAdmin>(
+		{} as leitosAdmin
 	);
+
+	const [leitos, setLeitos] = useState<leitosAdmin[]>([]);
+	const [loading, setLoading] = useState(false);
 
 	const actionButton: ActionButton[] = [
 		{
 			label: "Selecionar Leito",
 			icon: <ExternalLink size={20} />,
-			onClick: (row: LeitoSelected) => {
+			onClick: (row: leitosAdmin) => {
 				setLeitoSelected(row);
 				setIsOpenLeitoDialog(true);
 				// localStorage.setItem(
@@ -30,6 +36,28 @@ const LeitosPage = () => {
 			},
 		},
 	];
+
+	async function listLeitos(search?: string) {
+		try {
+			setLoading(true);
+			const params = {
+				nome: search,
+				idSetor: undefined,
+				status: undefined,
+				ativo: true
+			}
+			const response = await useGetLeitos.execute(params)
+			setLeitos(response.data);
+		} catch (error) {
+			errorHandler(error);
+		} finally {
+			setLoading(false);
+		}
+	}
+
+	useEffect(() => {
+		listLeitos();
+	}, [])
 
 	return (
 		<LeitoLayout>
@@ -59,6 +87,7 @@ const LeitosPage = () => {
 					actions={actionButton}
 					columns={columnsLeitos}
 					data={leitos}
+					isLoading={loading}
 				/>
 			</div>
 			{isOpenLeitoDialog && (

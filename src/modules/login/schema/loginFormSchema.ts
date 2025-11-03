@@ -7,7 +7,6 @@ const LoginFormSchema = z.object({
 	senha: z.string().min(6, {
 		message: "Senha deve conter pelo menos 6 caracteres",
 	}),
-	remember: z.boolean(),
 });
 
 export { LoginFormSchema };

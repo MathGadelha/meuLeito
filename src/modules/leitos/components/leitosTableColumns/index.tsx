@@ -1,42 +1,43 @@
+import { leitosAdmin } from "@modules/adminLeitos/services/getLeitos/getLeitos.dto";
 import { LeitoSelected } from "@modules/leitos/types/leitoSelected";
 import { ColumnDef } from "@tanstack/react-table";
 
-const columnsLeitos: ColumnDef<LeitoSelected>[] = [
+const columnsLeitos: ColumnDef<leitosAdmin>[] = [
     {
-        accessorKey: "label",
+        accessorKey: "leito",
         header: "Leito",
         cell: ({ row }) => {
-            const value = row.original.label
+            const value = row.original.Nome
             return (
                 <p>{value}</p>
             );
         },
     },
     {
-        accessorKey: "ocupado",
-        header: "Ocupado",
+        accessorKey: "status",
+        header: "Status",
         cell: ({ row }) => {
-            const value = row.original.ocupado ? "Sim" : "Não";
+            const value = row.original.Status;
             return (
                 <p>{value}</p>
             );
         },
     },
+    // {
+    //     accessorKey: "nome",
+    //     header: "Paciente",
+    //     cell: ({ row }) => {
+    //         const value = row.original.ocupado && row.original.paciente ? row.original.paciente.nome : "";
+    //         return (
+    //             <p>{value}</p>
+    //         );
+    //     },
+    // },
     {
-        accessorKey: "nome",
-        header: "Paciente",
+        accessorKey: "setor",
+        header: "Setor",
         cell: ({ row }) => {
-            const value = row.original.ocupado && row.original.paciente ? row.original.paciente.nome : "";
-            return (
-                <p>{value}</p>
-            );
-        },
-    },
-    {
-        accessorKey: "chamados",
-        header: "Chamados",
-        cell: ({ row }) => {
-            const value = row.original.chamados || 0;
+            const value = row.original.nome_setor;
             return (
                 <p>{value}</p>
             );

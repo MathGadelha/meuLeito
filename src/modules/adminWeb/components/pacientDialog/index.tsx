@@ -17,6 +17,7 @@ import { useEffect } from "react";
 import dayjs from "dayjs";
 import { errorHandler } from "@api/errorHandler";
 import { editPacienteService } from "@modules/adminWeb/services/putPaciente/putPaciente.service";
+import { InputMask } from "@components/inputMask";
 
 type dialogProp = {
 	isOpen: boolean;
@@ -48,7 +49,6 @@ const PacienteDialog = ({ isOpen, onOpenChange, pacienteSelected, onSend }: dial
 
 	async function onSubmit() {
 		try {
-			console.log("submit");
 			const params = {
 				nome: form.getValues("nome"),
 				nascimento: form.getValues("dataNascimento"),
@@ -64,7 +64,7 @@ const PacienteDialog = ({ isOpen, onOpenChange, pacienteSelected, onSend }: dial
 
 	useEffect(() => {
 		form.setValue("nome", pacienteSelected.Nome);
-		form.setValue("cpf", pacienteSelected.Cpf);
+		form.setValue("cpf", pacienteSelected.CPF);
 		form.setValue("dataNascimento", dayjs(pacienteSelected.Nascimento).format("YYYY-MM-DD"));
 		form.setValue("sexo", pacienteSelected.Sexo);
 	}, [pacienteSelected]);
@@ -101,7 +101,12 @@ const PacienteDialog = ({ isOpen, onOpenChange, pacienteSelected, onSend }: dial
 											<FormItem>
 												<FormLabel>CPF</FormLabel>
 												<FormControl>
-													<Input placeholder="000.000.000-00" {...field} />
+													<InputMask
+														mask="999.999.999-99"
+														value={field.value}
+														onChange={field.onChange}
+														placeholder="000.000.000-00"
+													/>
 												</FormControl>
 												<FormMessage />
 											</FormItem>
@@ -143,19 +148,20 @@ const PacienteDialog = ({ isOpen, onOpenChange, pacienteSelected, onSend }: dial
 											</FormItem>
 										)}
 									/>
+									<div className="w-full flex justify-end p-4 col-span-2 mt-4">
+										<Button
+											variant="outline"
+											onClick={() => onOpenChange(false)}
+											className="mr-2 w-1/4"
+										>
+											Fechar
+										</Button>
+										<Button className="w-1/4" type="submit">Salvar</Button>
+									</div>
 								</form>
 							</Form>
 						</div>
-						<div className="w-full flex justify-end p-4">
-							<Button
-								variant="outline"
-								onClick={() => console.log(form.getValues())}
-								className="mr-2 w-1/4"
-							>
-								Fechar
-							</Button>
-							<Button className="w-1/4">Salvar</Button>
-						</div>
+
 					</DialogDescription>
 				</DialogHeader>
 			</DialogContent>

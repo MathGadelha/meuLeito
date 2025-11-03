@@ -49,7 +49,7 @@ const SetoresDialog = ({ isOpen, onOpenChange, setorSelected, tipo, onSend }: di
 			{
 				name: "nome",
 				type: "text",
-				label: "Número do Leito",
+				label: "Nome do Setor",
 				id: "usuario",
 				styleDiv: "w-full",
 			},

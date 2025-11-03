@@ -1,5 +1,5 @@
-type EditComorbidadeInPut = {
+type EditAlergiaInPut = {
     nome: string;
 }
 
-export type { EditComorbidadeInPut };
+export type { EditAlergiaInPut };

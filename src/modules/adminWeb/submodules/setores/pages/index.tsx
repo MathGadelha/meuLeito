@@ -21,6 +21,7 @@ const SetoresPage = () => {
     const [setorSelected, setSetorSelected] = useState<setor>();
     const [loading, setLoading] = useState(false);
     const [tipo, setTipo] = useState<"C" | "E">("C");
+    const [search, setSearch] = useState<string>("");
 
     const actionButton: ActionButton[] = [
         {
@@ -34,7 +35,7 @@ const SetoresPage = () => {
         },
     ];
 
-    async function listSetores(search?: string) {
+    async function listSetores() {
         try {
             setLoading(true);
             const params = {
@@ -53,6 +54,14 @@ const SetoresPage = () => {
         listSetores();
     }, [])
 
+    useEffect(() => {
+        const debounce = setTimeout(() => {
+            listSetores();
+        }, 750);
+
+        return () => clearTimeout(debounce);
+    }, [search])
+
     return (
         <AdminWebLayout>
             <p className="font-semibold text-xl">Gerenciamento de Setores</p>
@@ -64,11 +73,7 @@ const SetoresPage = () => {
                         <Input
                             className="w-full  border-none focus-visible:ring-0 focus-visible:ring-ring focus-visible:ring-offset-0"
                             onChange={(e) => {
-                                const debounce = setTimeout(() => {
-                                    listSetores(e.target.value);
-                                }, 750);
-
-                                return () => clearTimeout(debounce);
+                                setSearch(e.target.value);
                             }}
                             placeholder="Pesquise uma pessoa por nome"
                         />

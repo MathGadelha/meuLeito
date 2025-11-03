@@ -7,12 +7,11 @@ import { Input } from "@components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select";
 import { usePacienteService } from "@modules/adminWeb/services/postPaciente/postPaciente.service";
 import { errorHandler } from "@api/errorHandler";
+import { InputMask } from "@components/inputMask";
 
 const formSchema = z.object({
     nome: z.string().min(2, "Nome obrigatório"),
-    cpf: z
-        .string(),
-    // .regex(/^\d{3}\.\d{3}\.\d{3}\-\d{2}$/, "CPF inválido (ex: 123.456.789-10)"),
+    cpf: z.string(),
     dataNascimento: z.string().regex(
         /^\d{4}\-\d{2}\-\d{2}$/,
         "Data inválida (formato: AAAA-MM-DD)"
@@ -22,7 +21,11 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-const FormCadastro = () => {
+type FormCadastroProps = {
+    onSuccess: () => void;
+};
+
+const FormCadastro = ({ onSuccess }: FormCadastroProps) => {
     const form = useForm<FormData>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -41,6 +44,8 @@ const FormCadastro = () => {
                 cpf: data.cpf
             }
             await usePacienteService.execute(params)
+            form.reset();
+            onSuccess();
         } catch (error) {
             errorHandler(error);
         }
@@ -73,7 +78,12 @@ const FormCadastro = () => {
                         <FormItem>
                             <FormLabel>CPF</FormLabel>
                             <FormControl>
-                                <Input placeholder="000.000.000-00" {...field} />
+                                <InputMask
+                                    mask="999.999.999-99"
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    placeholder="000.000.000-00"
+                                />
                             </FormControl>
                             <FormMessage />
                         </FormItem>

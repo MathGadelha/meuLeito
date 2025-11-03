@@ -11,6 +11,8 @@ import { leitosAdmin } from "../services/getLeitos/getLeitos.dto";
 import { errorHandler } from "@api/errorHandler";
 import { LeitoDialogAdmin } from "../components/leitoDialog";
 import { Input } from "@components/ui/input";
+import { Button } from "@components/ui/button";
+import { FaPlus } from "react-icons/fa";
 
 const LeitosAdminPage = () => {
     const [isOpenLeitoDialog, setIsOpenLeitoDialog] = useState(false);
@@ -18,9 +20,13 @@ const LeitosAdminPage = () => {
         {} as leitosAdmin
     );
     const [leitos, setLeitos] = useState<leitosAdmin[]>([]);
+    const [tipo, setTipo] = useState<"C" | "E">("C");
+    const [loading, setLoading] = useState(false);
+    const [search, setSearch] = useState("");
 
     async function listLeitos(search?: string) {
         try {
+            setLoading(true);
             const params = {
                 nome: search,
                 idSetor: undefined,
@@ -31,6 +37,8 @@ const LeitosAdminPage = () => {
             setLeitos(response.data);
         } catch (error) {
             errorHandler(error);
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -41,6 +49,7 @@ const LeitosAdminPage = () => {
             onClick: (row: leitosAdmin) => {
                 setLeitoSelected(row);
                 setIsOpenLeitoDialog(true);
+                setTipo("E");
                 // localStorage.setItem(
                 // 	"@farmacias-selected-people",
                 // 	JSON.stringify({ ...row, convenio: convenio[0], nomeConvenio: convenio[1] })
@@ -53,6 +62,14 @@ const LeitosAdminPage = () => {
     useEffect(() => {
         listLeitos();
     }, [])
+
+    useEffect(() => {
+        const debounce = setTimeout(() => {
+            listLeitos(search);
+        }, 750);
+
+        return () => clearTimeout(debounce);
+    }, [search]);
 
     return (
         <LeitoAdminLayout>
@@ -77,25 +94,31 @@ const LeitosAdminPage = () => {
                     ]}
                 />
             </div>
-            <div className="flex items-center gap-2 mt-8 mx-8 border rounded-lg w-1/4">
-                <Search size={20} className="ml-4" />
-                <Input
-                    className="w-full  border-none focus-visible:ring-0 focus-visible:ring-ring focus-visible:ring-offset-0"
-                    onChange={(e) => {
-                        const debounce = setTimeout(() => {
-                            listLeitos(e.target.value);
-                        }, 750);
-
-                        return () => clearTimeout(debounce);
-                    }}
-                    placeholder="Pesquise uma pessoa por nome"
-                />
+            <div className="flex flex-row items-center justify-between mt-8 mx-8">
+                <div className="w-1/4 flex items-center gap-2 border rounded-lg">
+                    <Search size={20} className="ml-4" />
+                    <Input
+                        className="w-full  border-none focus-visible:ring-0 focus-visible:ring-ring focus-visible:ring-offset-0"
+                        onChange={(e) => {
+                            setSearch(e.target.value);
+                        }}
+                        placeholder="Pesquise por um leito"
+                    />
+                </div>
+                <Button className="bg-primary gap-2" onClick={() => {
+                    setTipo("C");
+                    setLeitoSelected({} as leitosAdmin);
+                    setIsOpenLeitoDialog(true);
+                }}>
+                    <FaPlus />Criar Leito
+                </Button>
             </div>
             <div className="w-full h-full p-8">
                 <DataTable
                     actions={actionButton}
                     columns={columnsLeitosAdmin}
                     data={leitos}
+                    isLoading={loading}
                 />
             </div>
             {isOpenLeitoDialog && (
@@ -103,6 +126,8 @@ const LeitosAdminPage = () => {
                     isOpen={isOpenLeitoDialog}
                     onOpenChange={() => setIsOpenLeitoDialog(false)}
                     leitoSelected={leitoSelected}
+                    tipo={tipo}
+                    onSend={() => { listLeitos(); setIsOpenLeitoDialog(false); }}
                 />
             )}
         </LeitoAdminLayout>

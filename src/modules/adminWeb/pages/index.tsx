@@ -3,12 +3,13 @@ import { FormCadastro } from "../components/createUserForm";
 import { AdminWebLayout } from "../components/layout";
 import { DataTable } from "@components/dataTable";
 import { columnsPacientes } from "../components/pacientTableColumns";
-import { Trash2, UserRoundPen } from "lucide-react";
+import { Search, Trash2, UserRoundPen } from "lucide-react";
 import { ActionButton } from "@components/types/ActionButton";
 import { useEffect, useState } from "react";
 import { ListPacientes } from "../services/listPacientes/listPacientes.service";
 import { userData } from "../services/listPacientes/listPacientes.dto";
 import { PacienteDialog } from "../components/pacientDialog";
+import { Input } from "@components/ui/input";
 
 
 const AdministradorPage = () => {
@@ -17,6 +18,8 @@ const AdministradorPage = () => {
 		{} as userData
 	);
 	const [pacientes, setPacientes] = useState<userData[]>([]);
+	const [search, setSearch] = useState<string>("");
+	const [loading, setLoading] = useState<boolean>(false);
 
 	const actionButton: ActionButton[] = [
 		{
@@ -25,36 +28,20 @@ const AdministradorPage = () => {
 			onClick: (row: userData) => {
 				setIsOpenUserDialog(true);
 				setUsuarioSelected(row);
-				// localStorage.setItem(
-				// 	"@farmacias-selected-people",
-				// 	JSON.stringify({ ...row, convenio: convenio[0], nomeConvenio: convenio[1] })
-				// );
-				// navigate('/farmacias/selecao-beneficiario/triagem')
-			},
-		},
-		{
-			label: "Deletar paciente",
-			icon: <Trash2 size={20} color="red" />,
-			onClick: (row: userData) => {
-				setUsuarioSelected(row);
-				// localStorage.setItem(
-				// 	"@farmacias-selected-people",
-				// 	JSON.stringify({ ...row, convenio: convenio[0], nomeConvenio: convenio[1] })
-				// );
-				// navigate('/farmacias/selecao-beneficiario/triagem')
 			},
 		},
 	];
 
 
-	async function getPacientes() {
+	async function getPacientes(searchParam?: string) {
 		try {
-			const nome = "";
-			const response = await ListPacientes.execute(nome);
-			console.log(response)
+			setLoading(true);
+			const response = await ListPacientes.execute(searchParam || "");
 			setPacientes(response.data);
 		} catch (error) {
 			console.error("Erro ao buscar pessoas:", error);
+		} finally {
+			setLoading(false);
 		}
 	}
 
@@ -66,13 +53,28 @@ const AdministradorPage = () => {
 		<AdminWebLayout>
 			<p className="font-semibold text-xl">Cadastro de pacientes</p>
 			<p className="text-slate-300">Gerencie os pacientes aqui.</p>
-			<FormCadastro />
+			<FormCadastro onSuccess={() => getPacientes()} />
 			<Separator />
 			<div className="w-full h-full p-8">
+				<div className="w-1/3 my-4 flex items-center gap-2 border rounded-lg">
+					<Search size={20} className="ml-4" />
+					<Input
+						className="w-full  border-none focus-visible:ring-0 focus-visible:ring-ring focus-visible:ring-offset-0"
+						onChange={(e) => {
+							const debounce = setTimeout(() => {
+								getPacientes(e.target.value);
+							}, 750);
+
+							return () => clearTimeout(debounce);
+						}}
+						placeholder="Pesquise um paciente por nome"
+					/>
+				</div>
 				<DataTable
 					actionButtons={actionButton}
 					columns={columnsPacientes}
 					data={pacientes}
+					isLoading={loading}
 				/>
 			</div>
 

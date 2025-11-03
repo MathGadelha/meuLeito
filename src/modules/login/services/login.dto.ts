@@ -4,9 +4,8 @@ type LoginInputDto = {
 };
 
 type LoginOutputDto = {
-	usuario: { id: number; login: string; role: string; };
+	usuario: { id: number; login: string; permissoes: string[]; };
 	token: string;
-	perfil: string[];
 };
 
 type Perfil = {

@@ -14,9 +14,10 @@ type leitosAdmin = {
     Nome: string,
     Descricao?: string,
     IdSetor: number,
-    SetorNome: string,
-    Status: "Ocupado" | "Manutenção" | "Disponível",
-    Ativo: boolean
+    nome_setor: string,
+    Status: "Ocupado" | "Manutenção" | "Disponível" | "Livre",
+    Ativo: boolean,
+    nome_leito: string
 }
 
 export type { leitosInPut, leitosOutPut, leitosAdmin };

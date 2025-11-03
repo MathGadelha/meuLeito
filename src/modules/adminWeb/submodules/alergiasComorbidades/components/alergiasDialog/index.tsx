@@ -48,7 +48,7 @@ const AlergiasDialog = ({ isOpen, onOpenChange, AlergiaSelected, tipo, onSend }:
 			{
 				name: "nome",
 				type: "text",
-				label: "Número do Leito",
+				label: "Nome da Alergia",
 				id: "usuario",
 				styleDiv: "w-full",
 			},

@@ -48,7 +48,7 @@ const ComorbidadesDialog = ({ isOpen, onOpenChange, comorbidadeSelected, tipo, o
 			{
 				name: "nome",
 				type: "text",
-				label: "Número do Leito",
+				label: "Nome da Comorbidade",
 				id: "usuario",
 				styleDiv: "w-full",
 			},
