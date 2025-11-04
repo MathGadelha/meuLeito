@@ -3,7 +3,7 @@ import { FormCadastro } from "../components/createUserForm";
 import { AdminWebLayout } from "../components/layout";
 import { DataTable } from "@components/dataTable";
 import { columnsPacientes } from "../components/pacientTableColumns";
-import { Search, Trash2, UserRoundPen } from "lucide-react";
+import { Search, UserRoundPen } from "lucide-react";
 import { ActionButton } from "@components/types/ActionButton";
 import { useEffect, useState } from "react";
 import { ListPacientes } from "../services/listPacientes/listPacientes.service";
@@ -33,10 +33,10 @@ const AdministradorPage = () => {
 	];
 
 
-	async function getPacientes(searchParam?: string) {
+	async function getPacientes() {
 		try {
 			setLoading(true);
-			const response = await ListPacientes.execute(searchParam || "");
+			const response = await ListPacientes.execute(search || "");
 			setPacientes(response.data);
 		} catch (error) {
 			console.error("Erro ao buscar pessoas:", error);
@@ -48,6 +48,14 @@ const AdministradorPage = () => {
 	useEffect(() => {
 		getPacientes();
 	}, []);
+
+	useEffect(() => {
+		const debounce = setTimeout(() => {
+			getPacientes();
+		}, 750);
+
+		return () => clearTimeout(debounce);
+	},[search])
 
 	return (
 		<AdminWebLayout>
@@ -61,11 +69,7 @@ const AdministradorPage = () => {
 					<Input
 						className="w-full  border-none focus-visible:ring-0 focus-visible:ring-ring focus-visible:ring-offset-0"
 						onChange={(e) => {
-							const debounce = setTimeout(() => {
-								getPacientes(e.target.value);
-							}, 750);
-
-							return () => clearTimeout(debounce);
+							setSearch(e.target.value)
 						}}
 						placeholder="Pesquise um paciente por nome"
 					/>

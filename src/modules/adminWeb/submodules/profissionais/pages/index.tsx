@@ -1,6 +1,6 @@
 import { Separator } from "@components/ui/separator";
 import { DataTable } from "@components/dataTable";
-import { Search, Trash2, UserRoundPen } from "lucide-react";
+import { Search, UserRoundPen } from "lucide-react";
 import { ActionButton } from "@components/types/ActionButton";
 import { useEffect, useState } from "react";
 import { AdminWebLayout } from "@modules/adminWeb/components/layout";

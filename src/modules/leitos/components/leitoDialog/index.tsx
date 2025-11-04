@@ -15,11 +15,10 @@ import { defaultValuesInserirPacienteLeitos } from "@modules/leitos/schema/defau
 import { InserirPacienteLeitosFormSchema } from "@modules/leitos/schema/leitosFormSchema";
 import { pacienteLeitoData } from "@modules/leitos/services/getPacienteLeito/getPacienteLeito.dto";
 import { useGetPacienteLeitos } from "@modules/leitos/services/getPacienteLeito/getPacienteLeito.service";
-import { LeitoSelected } from "@modules/leitos/types/leitoSelected";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormMessage } from "@components/ui/form";
 import { z } from "zod";
 import { CadastroSheet } from "../cadastroSheet";
 import { useInserirPacienteService } from "@modules/leitos/services/inserirPaciente/inserirPaciente.service";

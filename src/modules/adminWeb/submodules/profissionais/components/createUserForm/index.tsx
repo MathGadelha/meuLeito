@@ -34,7 +34,6 @@ type FormCadastroProps = {
 const FormCadastro = ({ onSuccess }: FormCadastroProps) => {
 
     const [perfis, setPerfis] = useState<perfilData[]>([]);
-    const [searchPerfis, setSearchPerfis] = useState<string>("");
 
     const form = useForm<FormData>({
         resolver: zodResolver(formSchema),
@@ -70,7 +69,7 @@ const FormCadastro = ({ onSuccess }: FormCadastroProps) => {
     async function getPerfis() {
         try {
             const params = {
-                nome: searchPerfis
+                nome: ""
             }
             const response = await ListPerfis.execute(params.nome);
 
@@ -213,32 +212,6 @@ const FormCadastro = ({ onSuccess }: FormCadastroProps) => {
                         </FormItem>
                     )}
                 />
-                {/* <FormField
-                    control={form.control}
-                    name="idPerfil"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormControl>
-                                <SelectPaginate
-                                    inputValue={searchPerfis}
-                                    label="Pesquise pelo perfil."
-                                    options={perfis}
-                                    placeholder=""
-                                    onInputValueChange={(e) => setSearchPerfis(e)}
-                                    setSelecionadoSelect={(e) =>
-                                        form.setValue("idPerfil", e ? e.value : "")
-                                    }
-                                    clearInput={() => {
-                                        setPerfis([]);
-                                        form.setValue("idPerfil", "");
-                                        setSearchPerfis("");
-                                    }}
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                /> */}
                 <div className="w-full flex justify-end mt-8 col-span-2">
                     <Button type="submit" className="w-1/2">
                         Enviar

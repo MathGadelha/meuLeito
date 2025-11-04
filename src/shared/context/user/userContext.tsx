@@ -1,11 +1,12 @@
 import React, { createContext, useEffect, useState } from "react";
 import { UserContextType } from "./userContextType";
+import { userType } from "./userType";
 // import { UserData } from "@modules/gestaoProfissionais/interfaces/userData";
 
 const UserContext = createContext<UserContextType>({} as UserContextType);
 
 const UserContextProvider = ({ children }: { children: React.ReactNode }) => {
-	const [user, setUser] = useState<string>(() => {
+	const [user, setUser] = useState<userType>(() => {
 		const userLocalStorage = localStorage.getItem("@user");
 		if (!userLocalStorage) return "";
 		return userLocalStorage;
@@ -25,7 +26,7 @@ const UserContextProvider = ({ children }: { children: React.ReactNode }) => {
 
 	useEffect(() => {
 		if (user) {
-			localStorage.setItem("@user", user);
+			localStorage.setItem("@user", JSON.stringify(user));
 		}
 	}, [user]);
 

@@ -1,8 +1,7 @@
 import { LeitoLayout } from "../components/layout";
-import { indicadores, leitos } from "../mocks/leitos";
+import { indicadores } from "../mocks/leitos";
 import { useEffect, useState } from "react";
 import { LeitoDialog } from "../components/leitoDialog";
-import { LeitoSelected } from "../types/leitoSelected";
 import { HeaderCard } from "../components/headerCard";
 import { DataTable } from "@components/dataTable";
 import { columnsLeitos } from "../components/leitosTableColumns";

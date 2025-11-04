@@ -3,7 +3,8 @@ type listPacienteLeitoOutput = {
 }
 
 type pacienteLeitoData = {
-    ip_paciente: number,
+    id_paciente_leito: number;
+    id_paciente: number,
     IdSetor: number,
     IdLeito: number,
     Nome: string,

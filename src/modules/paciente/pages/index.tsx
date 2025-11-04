@@ -130,14 +130,13 @@ const PacientesPage = () => {
 
     // enviar de verdade
     const handleSendCall = () => {
-        if (!pacienteLeito.ip_paciente || !pacienteLeito.IdSetor) return;
+        if (!pacienteLeito.id_paciente || !pacienteLeito.IdSetor) return;
 
         const payload = {
-            id_paciente_leito: pacienteLeito.ip_paciente,
+            id_paciente_leito: pacienteLeito.id_paciente_leito,
             setorId: pacienteLeito.IdSetor,
             prioridade: selectedPriority,
             mensagem: observation || null,
-            // 👇 envia o nome do paciente e o nome do leito
             nomePaciente: pacienteLeito.Nome,
             nomeLeito: pacienteLeito.nome_leito,
         };
@@ -157,7 +156,7 @@ const PacientesPage = () => {
 
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col">
-            {pacienteLeito && pacienteLeito.ip_paciente ? (
+            {pacienteLeito && pacienteLeito.id_paciente ? (
                 <>
                     <header className="bg-white shadow-md p-4 flex items-center justify-between">
                         <div>

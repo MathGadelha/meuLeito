@@ -1,5 +1,4 @@
 import { leitosAdmin } from "@modules/adminLeitos/services/getLeitos/getLeitos.dto";
-import { LeitoSelected } from "@modules/leitos/types/leitoSelected";
 import { ColumnDef } from "@tanstack/react-table";
 
 const columnsLeitos: ColumnDef<leitosAdmin>[] = [

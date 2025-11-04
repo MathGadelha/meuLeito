@@ -145,7 +145,7 @@ const LeitoDialogAdmin = ({ isOpen, onOpenChange, leitoSelected, tipo, onSend }:
 								<FormField
 									control={form.control}
 									name="setor"
-									render={({ field }) => (
+									render={() => (
 										<FormItem>
 											<FormControl>
 												<SelectPaginate

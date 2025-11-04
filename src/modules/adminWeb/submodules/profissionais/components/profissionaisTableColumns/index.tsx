@@ -1,6 +1,3 @@
-
-// import { usuariosData } from "@modules/adminWeb/types/usuarios.dto";
-// import { LeitoSelected } from "@modules/leitos/types/leitoSelected";
 import { treatsText } from "@shared/utils/filter";
 import { ColumnDef } from "@tanstack/react-table";
 import { userData } from "../../services/listProfissionais/listProfissionais.dto";

@@ -16,7 +16,7 @@ function useVerifyIfHasProfileToAccessModule() {
 		const parsedUserData: LoginOutputDto = userData
 			? JSON.parse(userData)
 			: null;
-		const perfil = parsedUserData?.perfil;
+		const perfil = parsedUserData.usuario.permissoes;
 
 		if (
 			perfisByModule.some((perfilByModule) =>

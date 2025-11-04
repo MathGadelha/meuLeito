@@ -1,7 +1,6 @@
 import { SidebarButton } from "@shared/types/sidebarButton";
 import { FaPeopleGroup, FaUserDoctor } from "react-icons/fa6";
 import { LuClipboardEdit } from "react-icons/lu";
-import { MdOutlineRestaurantMenu } from "react-icons/md";
 // import { IoQrCodeOutline } from "react-icons/io5";
 import { FaAllergies, FaMapMarkerAlt } from "react-icons/fa";
 
