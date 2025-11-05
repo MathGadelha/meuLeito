@@ -5,6 +5,7 @@ type putProfissionaisInput = {
     cpf?: string
     senha?: string,
     id_perfil?: number
+    setores?: number[]
 }
 
 export type { putProfissionaisInput }

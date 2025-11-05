@@ -9,7 +9,7 @@ type DashboardItemModule = {
 	description: string;
 	moduleAction: moduleAction[];
 	path: string;
-	// permissions: string[];
+	permissions: string[];
 	assignedUsers: { src: string; fallback: string }[];
 	disabled?: boolean;
 };

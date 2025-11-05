@@ -94,6 +94,10 @@ const LeitosPage = () => {
 					isOpen={isOpenLeitoDialog}
 					onOpenChange={() => setIsOpenLeitoDialog(false)}
 					leitoSelected={leitoSelected}
+					onSend={() => {
+						setIsOpenLeitoDialog(false);
+						listLeitos();
+					}}
 				/>
 			)}
 		</LeitoLayout>

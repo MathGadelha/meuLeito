@@ -1,10 +1,7 @@
 type userType = {
     id: number,
     login: string,
-    perfil: string,
     permissoes: string[]
-    setores: { Id: number, Nome: string }[]
-
 }
 
 export type { userType };

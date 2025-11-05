@@ -17,6 +17,9 @@ import notification from "@assets/audios/simple-notification-152054.mp3";
 import { FaCheck } from "react-icons/fa6";
 import { socket, joinSetor } from "@api/websocket";
 import { useUserContext } from "@shared/context/user/useUserContext";
+import { errorHandler } from "@api/errorHandler";
+import { useGetChamados } from "@shared/services/getChamados/getChamados.service";
+import { SetorDialog } from "@components/dialogSetor";
 
 type Props = {
 	children: React.ReactNode;
@@ -45,13 +48,14 @@ const Layout = ({
 }: Props) => {
 	const navigate = useNavigate();
 	const [isOpenDialog, setIsOpenDialog] = useState(false);
+	const [isOpenSetorDialog, setIsOpenSetorDialog] = useState(false);
 
 	// 🆕 agora é ARRAY
 	const [notifications, setNotifications] = useState<Notif[]>([]);
 
 	const audioRef = useRef<HTMLAudioElement | null>(null);
 
-	const { user } = useUserContext();
+	const { user, setor } = useUserContext();
 
 	// carrega áudio 1x
 	useEffect(() => {
@@ -75,7 +79,7 @@ const Layout = ({
 		}
 
 		// depois troca para o setor do usuário logado
-		const SETOR_ID = 1;
+		const SETOR_ID = setor.value
 		joinSetor(SETOR_ID);
 
 		const handleEntrou = (data: any) => {
@@ -107,9 +111,7 @@ const Layout = ({
 		};
 	}, []);
 
-	// receber chamado + quando alguém aceitar remover
 	useEffect(() => {
-		// quando chegar novo chamado
 		const handleReceberChamado = (data: any) => {
 			console.log("🚨 [socket] chamado recebido:", data);
 
@@ -124,17 +126,14 @@ const Layout = ({
 				nomeLeito: data.NomeLeito,
 			};
 
-			// adiciona NO COMEÇO (ordem de chegada: mais novo em cima)
 			setNotifications((prev) => [newNotif, ...prev]);
 
-			// toca som
 			if (audioRef.current) {
 				audioRef.current.currentTime = 0;
 				audioRef.current.play().catch(() => { });
 			}
 		};
 
-		// quando OUTRA enfermeira aceitar, remove da lista
 		const handleChamadoAceito = (data: any) => {
 			console.log("📩 [socket] chamado_aceito:", data);
 			const { chamadoId } = data;
@@ -183,11 +182,29 @@ const Layout = ({
 			setorId: notif.setorId,
 		});
 
-		// remove só esse da lista
 		setNotifications((prev) =>
 			prev.filter((n) => n.chamadoId !== notif.chamadoId)
 		);
 	};
+
+	async function getChamados() {
+		try {
+			const params = {
+				id_setor: 1
+			}
+			// const response = await useGetChamados.execute()
+		} catch (error) {
+			errorHandler(error);
+		}
+	}
+
+	useEffect(() => {
+		getChamados();
+		const setorLocalStorage = localStorage.getItem("@setorSelected");
+		if (!setorLocalStorage) {
+			setIsOpenSetorDialog(true);
+		}
+	}, [])
 
 	return (
 		<div className="w-full h-screen flex relative">
@@ -330,6 +347,10 @@ const Layout = ({
 					))}
 				</div>
 			)}
+			{isOpenSetorDialog && <SetorDialog
+				isOpen={isOpenSetorDialog}
+				onOpenChange={setIsOpenSetorDialog}
+			/>}
 		</div>
 	);
 };

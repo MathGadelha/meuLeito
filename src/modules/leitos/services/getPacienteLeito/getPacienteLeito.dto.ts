@@ -3,16 +3,18 @@ type listPacienteLeitoOutput = {
 }
 
 type pacienteLeitoData = {
-    id_paciente_leito: number;
-    id_paciente: number,
-    IdSetor: number,
+    Id: number,
+    IdPaciente: number,
+    NomePaciente: string,
+    CPFPaciente: string,
     IdLeito: number,
-    Nome: string,
-    CPF: string,
-    Nascimento: string,
-    Sexo: "M" | "F",
+    NomeLeito: string,
+    IdSetor: number,
+    NomeSetor: string,
     DataEntrada: string,
-    nome_leito: string
+    DataSaida: string | null
+    SexoPaciente: string,
+    NascimentoPaciente: string,
 }
 
 

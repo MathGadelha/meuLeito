@@ -130,15 +130,15 @@ const PacientesPage = () => {
 
     // enviar de verdade
     const handleSendCall = () => {
-        if (!pacienteLeito.id_paciente || !pacienteLeito.IdSetor) return;
+        if (!pacienteLeito.IdPaciente || !pacienteLeito.IdSetor) return;
 
         const payload = {
-            id_paciente_leito: pacienteLeito.id_paciente_leito,
+            id_paciente_leito: pacienteLeito.Id,
             setorId: pacienteLeito.IdSetor,
             prioridade: selectedPriority,
             mensagem: observation || null,
-            nomePaciente: pacienteLeito.Nome,
-            nomeLeito: pacienteLeito.nome_leito,
+            nomePaciente: pacienteLeito.NomePaciente,
+            nomeLeito: pacienteLeito.NomeLeito,
         };
 
         console.log("📞 emitindo novo_chamado:", payload);
@@ -156,24 +156,22 @@ const PacientesPage = () => {
 
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col">
-            {pacienteLeito && pacienteLeito.id_paciente ? (
+            {pacienteLeito && pacienteLeito.IdPaciente ? (
                 <>
                     <header className="bg-white shadow-md p-4 flex items-center justify-between">
                         <div>
                             <h1 className="text-xl font-bold text-gray-800">
-                                Olá, {pacienteLeito.Nome}!
+                                Olá, {pacienteLeito.NomePaciente}!
                             </h1>
                             <p className="text-sm text-gray-500">
-                                Paciente do {pacienteLeito.nome_leito}
+                                Paciente do {pacienteLeito.NomeLeito} - {pacienteLeito.NomeSetor}
                             </p>
                         </div>
                         <div className="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-semibold">
                             M
                         </div>
                     </header>
-
                     <main className="flex-1 p-6 space-y-6">
-                        {/* Último chamado dinâmico */}
                         <section className="bg-white rounded-lg shadow p-4">
                             <h2 className="text-lg font-semibold text-gray-700 mb-2">
                                 Último chamado
@@ -213,8 +211,6 @@ const PacientesPage = () => {
                                 </>
                             )}
                         </section>
-
-                        {/* Central de atendimento -> só o botão */}
                         <section>
                             <h2 className="text-lg font-semibold text-gray-700 mb-4">
                                 Central de Atendimento

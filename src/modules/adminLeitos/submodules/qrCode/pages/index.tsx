@@ -6,27 +6,30 @@ import { useGetLeitos } from "@modules/adminLeitos/services/getLeitos/getLeitos.
 import { errorHandler } from "@api/errorHandler";
 import { Card } from "@components/ui/card";
 import { Separator } from "@components/ui/separator";
-// import { FilterPopover } from "@components/filter/Filter";
+import { FilterPopover } from "@components/filter/Filter";
+import { useGetSetores } from "@modules/adminWeb/submodules/setores/services/getSetores/getSetores.service";
 
-// type Level = "L" | "M" | "Q" | "H";
+type FilterOptions = {
+    id: string;
+    label: string;
+}
 
 function QRGenerator() {
-    // const [text, setText] = useState("");
     const [fg, setFg] = useState("#111111");
 
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
-    const svgRef = useRef<SVGSVGElement | null>(null);
 
     const [leitos, setLeitos] = useState<leitosAdmin[]>([]);
     const [leitoSelected, setLeitoSelected] = useState<leitosAdmin | null>(null);
     const [loading, setLoading] = useState(false);
+    const [setores, setSetores] = useState<FilterOptions[]>([]);
 
-    async function listLeitos() {
+    async function listLeitos(idSetor?: number) {
         try {
             setLoading(true);
             const params = {
                 nome: "",
-                idSetor: undefined,
+                idSetor: idSetor,
                 status: undefined,
                 ativo: true
             }
@@ -39,20 +42,23 @@ function QRGenerator() {
         }
     }
 
-    // async function listSetores() {
-    //     try {
-    //         const params = {
-    //             nome: "",
-    //             idSetor: undefined,
-    //             status: undefined,
-    //             ativo: true
-    //         }
-    //         const response = await useGetSetores.execute(params)
-    //         setSetores(response.data);
-    //     } catch (error) {
-    //         errorHandler(error);
-    //     }
-    // }
+    async function listSetores(idSetor?: string) {
+        try {
+            const params = {
+                nome: "",
+                idSetor: idSetor,
+                status: undefined,
+                ativo: true
+            }
+            const response = await useGetSetores.execute(params)
+            setSetores(response.data.map(setor => ({
+                id: setor.Id.toString(),
+                label: setor.Nome
+            })));
+        } catch (error) {
+            errorHandler(error);
+        }
+    }
 
     function downloadPNG() {
         if (!canvasRef.current) return;
@@ -64,43 +70,12 @@ function QRGenerator() {
     }
 
     function printQR() {
-        const w = window.open("", "_blank", "noopener,noreferrer,width=600,height=800");
-        if (!w) return;
 
-        let content = "";
-        if (svgRef.current) {
-            const xml = new XMLSerializer().serializeToString(svgRef.current);
-            content = xml;
-        } else if (canvasRef.current) {
-            const url = canvasRef.current.toDataURL("image/png");
-            content = `<img src="${url}" alt="QR Code" />`;
-        } else {
-            content = "<p>QR não disponível.</p>";
-        }
-
-        // HTML minimalista de impressão (centralizado + sem margens extras)
-        w.document.write(`
-      <!doctype html>
-      <html>
-        <head>
-          <meta charset="utf-8" />
-          <title>Imprimir QR</title>
-          <style>
-            @page { size: auto; margin: 10mm; }
-            html, body { height: 100%; }
-            body { display:flex; align-items:center; justify-content:center; }
-            svg, img { max-width: 90vw; max-height: 90vh; }
-          </style>
-        </head>
-        <body>${content}</body>
-      </html>
-    `);
-        w.document.close();
-        w.onload = () => w.print();
     }
 
     useEffect(() => {
         listLeitos();
+        listSetores();
     }, [])
 
     return (
@@ -110,29 +85,26 @@ function QRGenerator() {
                 <p className="text-slate-400">Crie os QR Codes para acesso do paciente aqui.</p>
                 <div className="w-full mt-8 flex flex-row gap-8">
                     <div className="w-1/2">
-                        {/* <FilterPopover
+                        <FilterPopover
                             variant={"default"}
                             key={"filter"}
                             clickFilter={(e) => {
-                                // filterData.set({
-                                //     dataInicial: e.dataInicial,
-                                //     dataFinal: e.dataFinal,
-                                //     selectPaginate: e.selectPaginate,
-                                // });
-                                console.log(e)
+                                if (e.itemsOfSelect && e.itemsOfSelect.length > 0) {
+                                    listLeitos(Number(e.itemsOfSelect[0].id))
+                                }
                             }}
                             style={{
                                 width: "w-36",
                             }}
                             contentGroupSelect={[
                                 {
-                                    defaultValues: boletimFilter.value.id,
+                                    defaultValues: "1",
                                     label: "Ordenação",
-                                    data: filterOptions,
+                                    data: setores,
                                 },
                             ]}
-                        /> */}
-                        <div className="w-full grid grid-cols-4 gap-4">
+                        />
+                        <div className="w-full grid grid-cols-4 gap-4 mt-4">
                             {loading ? (
                                 <p>Loading...</p>
                             ) : (

@@ -1,6 +1,7 @@
 import { LuClipboardEdit } from "react-icons/lu";
 import { TbUserHeart } from "react-icons/tb";
 import { DashboardModule } from "../types/dashboardModules";
+import { permissionsByModule } from "@shared/configs/permissionByModule";
 
 const ModulesDashboard = () => {
 	const modules: DashboardModule[] = [
@@ -12,7 +13,7 @@ const ModulesDashboard = () => {
 					description: "Gerencie os leitos e realize atendimentos.",
 					path: "/leitos",
 					disabled: true,
-					// permissions: ,
+					permissions: permissionsByModule.ENFERMEIRO,
 					moduleAction: [],
 					assignedUsers: [],
 					icon: <TbUserHeart />,
@@ -26,7 +27,7 @@ const ModulesDashboard = () => {
 					title: "Administrativo Web",
 					description: "Gerencie os usuários.",
 					path: "/administrativo-web",
-					// permissions: ,
+					permissions: permissionsByModule.SUPERVISORENFERMEIRO,
 					disabled: true,
 					moduleAction: [],
 					assignedUsers: [],
@@ -41,7 +42,7 @@ const ModulesDashboard = () => {
 					title: "Admin Leitos",
 					description: "Adminitração de leitos e criação de Qr Code.",
 					path: "/admin-leitos",
-					// permissions: ,
+					permissions: permissionsByModule.SUPERVISORENFERMEIRO,
 					disabled: true,
 					moduleAction: [],
 					assignedUsers: [],

@@ -20,6 +20,7 @@ import { ListPerfis } from "../../services/listPerfis/listPerfis.service";
 import { perfilData } from "../../services/listPerfis/listPerfis.dto";
 import { editProfissionaisService } from "../../services/putProfissionais/putProfissionais.service";
 import { InputMask } from "@components/inputMask";
+import { OptionSelectPaginate, SelectPaginate } from "@components/selectPaginate";
 
 type dialogProp = {
 	isOpen: boolean;
@@ -31,6 +32,9 @@ type dialogProp = {
 const ProfissionalDialog = ({ isOpen, onOpenChange, profissionalSelected, onSend }: dialogProp) => {
 
 	const [perfis, setPerfis] = useState<perfilData[]>([]);
+	const [selectedSetores, setSelectedSetores] = useState<OptionSelectPaginate[]>([]);
+	const [searchSetores, setSearchSetores] = useState("");
+	const [setores, setSetores] = useState<OptionSelectPaginate[]>([]);
 
 	const formSchema = z.object({
 		nome: z.string().optional(),
@@ -39,6 +43,7 @@ const ProfissionalDialog = ({ isOpen, onOpenChange, profissionalSelected, onSend
 		sexo: z.enum(["M", "F"], { message: "Selecione o sexo" }).optional(),
 		senha: z.string().min(6, "Senha deve ter no mínimo 6 caracteres").optional(),
 		idPerfil: z.string().min(1, "Selecione o perfil do usuário"),
+		idSetores: z.array(z.string()).min(1, "Selecione pelo menos um setor"),
 	});
 
 	type FormData = z.infer<typeof formSchema>;
@@ -63,6 +68,7 @@ const ProfissionalDialog = ({ isOpen, onOpenChange, profissionalSelected, onSend
 				cpf: form.getValues("cpf"),
 				senha: form.getValues("senha"),
 				id_perfil: Number(form.getValues("idPerfil")),
+				setores: form.getValues("idSetores").map(Number),
 			}
 			await editProfissionaisService.execute(String(profissionalSelected.Id), params)
 			onSend();
@@ -80,12 +86,39 @@ const ProfissionalDialog = ({ isOpen, onOpenChange, profissionalSelected, onSend
 		}
 	}
 
+	const addSetor = (opt?: OptionSelectPaginate | null) => {
+		if (!opt) return;
+		const ids = form.getValues("idSetores") || [];
+		if (ids.includes(opt.value)) return;
+
+		form.setValue("idSetores", [...ids, opt.value], { shouldValidate: true, shouldDirty: true });
+		setSelectedSetores((prev) => {
+			if (prev.some((s) => s.value === opt.value)) return prev;
+			return [...prev, opt];
+		});
+	};
+
+	const removeSetor = (value: string) => {
+		const ids = form.getValues("idSetores") || [];
+		const newIds = ids.filter((id) => id !== value);
+		form.setValue("idSetores", newIds, { shouldValidate: true, shouldDirty: true });
+
+		setSelectedSetores((prev) => prev.filter((s) => s.value !== value));
+	};
+
 	useEffect(() => {
 		form.setValue("nome", profissionalSelected.Nome);
 		form.setValue("cpf", profissionalSelected.CPF);
 		form.setValue("dataNascimento", dayjs(profissionalSelected.Nascimento).format("YYYY-MM-DD"));
 		form.setValue("sexo", profissionalSelected.Sexo);
 		form.setValue("idPerfil", profissionalSelected.IdPerfil.toString());
+		form.setValue("idSetores", profissionalSelected.Setores.map((setor) => setor.Id.toString()));
+		setSelectedSetores(
+			profissionalSelected.Setores.map((setor) => ({
+				label: setor.Nome,
+				value: setor.Id.toString(),
+			}))
+		);
 	}, [profissionalSelected]);
 
 	useEffect(() => {
@@ -203,6 +236,53 @@ const ProfissionalDialog = ({ isOpen, onOpenChange, profissionalSelected, onSend
 															))}
 														</SelectContent>
 													</Select>
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+									<FormField
+										control={form.control}
+										name="idSetores"
+										render={() => (
+											<FormItem>
+												<FormControl>
+													<>
+														<SelectPaginate
+															inputValue={searchSetores}
+															label="Pesquise pelo Setor."
+															options={setores}
+															placeholder=""
+															onInputValueChange={(e) => setSearchSetores(e)}
+															setSelecionadoSelect={(opt) => {
+																addSetor(opt); setSetores([]);
+																setSearchSetores("");
+															}}
+															clearInput={() => {
+																setSetores([]);
+																setSearchSetores("");
+															}}
+														/>
+														<div className="mt-2 flex flex-wrap gap-2">
+															{selectedSetores.map((s) => (
+																<span
+																	key={s.value}
+																	className="inline-flex items-center rounded-full border border-[#136f63] px-2 py-1 text-sm"
+																>
+																	{s.label}
+																	<button
+																		type="button"
+																		className="ml-2 leading-none hover:text-red-600"
+																		onClick={() => removeSetor(s.value)}
+																		aria-label={`Remover ${s.label}`}
+																		title={`Remover ${s.label}`}
+																	>
+																		×
+																	</button>
+																</span>
+															))}
+														</div>
+													</>
 												</FormControl>
 												<FormMessage />
 											</FormItem>

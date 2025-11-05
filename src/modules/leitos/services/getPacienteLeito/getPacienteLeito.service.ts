@@ -6,7 +6,7 @@ class getPacienteLeitos {
     constructor(private readonly api: AxiosInstance) { }
 
     async execute(id: string): Promise<listPacienteLeitoOutput> {
-        const response = await this.api.get<listPacienteLeitoOutput>(`/leitos/paciente-leito/${id}`);
+        const response = await this.api.get<listPacienteLeitoOutput>(`/joins/alocacao`, { params: { id_leito: id } });
 
         return response.data;
     }

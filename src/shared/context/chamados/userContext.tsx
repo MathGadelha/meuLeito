@@ -8,20 +8,14 @@ const UserContext = createContext<UserContextType>({} as UserContextType);
 const UserContextProvider = ({ children }: { children: React.ReactNode }) => {
 	const [user, setUser] = useState<userType>(() => {
 		const userLocalStorage = localStorage.getItem("@user");
-		if (!userLocalStorage) return {} as userType;
-		return JSON.parse(userLocalStorage);
+		if (!userLocalStorage) return "";
+		return userLocalStorage;
 	});
 
 	const [perfil, setPerfil] = useState<string[]>(() => {
 		const perfilLocalStorage = localStorage.getItem("@perfil");
 		if (!perfilLocalStorage) return "";
 		return JSON.parse(perfilLocalStorage);
-	});
-
-	const [setor, setSetor] = useState<string>(() => {
-		const setorLocalStorage = localStorage.getItem("@setorSelected");
-		if (!setorLocalStorage) return "";
-		return JSON.parse(setorLocalStorage);
 	});
 
 	// const [userData, setUserData] = useState<UserData>(() => {
@@ -50,10 +44,6 @@ const UserContextProvider = ({ children }: { children: React.ReactNode }) => {
 		perfil: {
 			value: perfil,
 			set: setPerfil,
-		},
-		setor: {
-			value: setor,
-			set: setSetor,
 		},
 		// userData: {
 		// 	value: userData,

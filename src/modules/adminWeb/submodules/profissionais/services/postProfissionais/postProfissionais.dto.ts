@@ -7,6 +7,7 @@ type postProfissionaisInput = {
     cpf: string,
     senha: string,
     id_perfil: number
+    setores: number[]
 }
 
 type postProfissionaisOutput = {

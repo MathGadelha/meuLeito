@@ -11,18 +11,20 @@ import { ListPerfis } from "../../services/listPerfis/listPerfis.service";
 import { useEffect, useState } from "react";
 import { perfilData } from "../../services/listPerfis/listPerfis.dto";
 import { useCreateProfissionaisService } from "../../services/postProfissionais/postProfissionais.service";
+import { OptionSelectPaginate, SelectPaginate } from "@components/selectPaginate";
+import { useGetSetores } from "@modules/adminWeb/submodules/setores/services/getSetores/getSetores.service";
 
 const formSchema = z.object({
     nome: z.string().min(2, "Nome obrigatório"),
     cpf: z.string(),
-    dataNascimento: z.string().regex(
-        /^\d{4}\-\d{2}\-\d{2}$/,
-        "Data inválida (formato: AAAA-MM-DD)"
-    ),
+    dataNascimento: z
+        .string()
+        .regex(/^\d{4}\-\d{2}\-\d{2}$/, "Data inválida (formato: AAAA-MM-DD)"),
     sexo: z.enum(["M", "F"], { message: "Selecione o sexo" }),
     senha: z.string().min(6, "Senha deve ter no mínimo 6 caracteres"),
     senhaConfirm: z.string().min(6, "Senha deve ter no mínimo 6 caracteres"),
     idPerfil: z.string().min(1, "Selecione o perfil do usuário"),
+    idSetores: z.array(z.string()).min(1, "Selecione pelo menos um setor"),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -32,8 +34,10 @@ type FormCadastroProps = {
 };
 
 const FormCadastro = ({ onSuccess }: FormCadastroProps) => {
-
     const [perfis, setPerfis] = useState<perfilData[]>([]);
+    const [setores, setSetores] = useState<OptionSelectPaginate[]>([]);
+    const [searchSetores, setSearchSetores] = useState("");
+    const [selectedSetores, setSelectedSetores] = useState<OptionSelectPaginate[]>([]);
 
     const form = useForm<FormData>({
         resolver: zodResolver(formSchema),
@@ -45,6 +49,7 @@ const FormCadastro = ({ onSuccess }: FormCadastroProps) => {
             senha: "",
             senhaConfirm: "",
             idPerfil: "",
+            idSetores: [],
         },
     });
 
@@ -56,10 +61,12 @@ const FormCadastro = ({ onSuccess }: FormCadastroProps) => {
                 sexo: data.sexo,
                 cpf: data.cpf,
                 senha: data.senha,
-                id_perfil: Number(data.idPerfil)
-            }
-            await useCreateProfissionaisService.execute(params)
+                id_perfil: Number(data.idPerfil),
+                setores: data.idSetores.map(Number),
+            };
+            await useCreateProfissionaisService.execute(params);
             form.reset();
+            setSelectedSetores([]);
             onSuccess();
         } catch (error) {
             errorHandler(error);
@@ -68,21 +75,53 @@ const FormCadastro = ({ onSuccess }: FormCadastroProps) => {
 
     async function getPerfis() {
         try {
-            const params = {
-                nome: ""
-            }
-            const response = await ListPerfis.execute(params.nome);
-
-            // const treatedPerfil: OptionSelectPaginate[] = response.data.map((item) => ({
-            //     value: item.Id.toString(),
-            //     label: treatsText(item.Nome),
-            // }));
-
+            const response = await ListPerfis.execute("");
             setPerfis(response.data);
         } catch (error) {
             errorHandler(error);
         }
     }
+
+    async function listSetores() {
+        try {
+            const response = await useGetSetores.execute({ nome: searchSetores });
+            const setoresOptions = response.data.map((setor) => ({
+                label: setor.Nome,
+                value: setor.Id.toString(),
+            }));
+            setSetores(setoresOptions);
+        } catch (error) {
+            errorHandler(error);
+        }
+    }
+
+    const addSetor = (opt?: OptionSelectPaginate | null) => {
+        if (!opt) return;
+        const ids = form.getValues("idSetores") || [];
+        // evita duplicidade
+        if (ids.includes(opt.value)) return;
+
+        form.setValue("idSetores", [...ids, opt.value], { shouldValidate: true, shouldDirty: true });
+        setSelectedSetores((prev) => {
+            if (prev.some((s) => s.value === opt.value)) return prev;
+            return [...prev, opt];
+        });
+    };
+
+    const removeSetor = (value: string) => {
+        const ids = form.getValues("idSetores") || [];
+        const newIds = ids.filter((id) => id !== value);
+        form.setValue("idSetores", newIds, { shouldValidate: true, shouldDirty: true });
+
+        setSelectedSetores((prev) => prev.filter((s) => s.value !== value));
+    };
+
+    useEffect(() => {
+        const debounce = setTimeout(() => {
+            if (searchSetores) listSetores();
+        }, 750);
+        return () => clearTimeout(debounce);
+    }, [searchSetores]);
 
     useEffect(() => {
         getPerfis();
@@ -90,10 +129,7 @@ const FormCadastro = ({ onSuccess }: FormCadastroProps) => {
 
     return (
         <Form {...form}>
-            <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="grid grid-cols-3 gap-4 p-6"
-            >
+            <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-3 gap-4 p-6">
                 <FormField
                     control={form.control}
                     name="nome"
@@ -162,6 +198,7 @@ const FormCadastro = ({ onSuccess }: FormCadastroProps) => {
                         </FormItem>
                     )}
                 />
+
                 <FormField
                     control={form.control}
                     name="senha"
@@ -175,6 +212,7 @@ const FormCadastro = ({ onSuccess }: FormCadastroProps) => {
                         </FormItem>
                     )}
                 />
+
                 <FormField
                     control={form.control}
                     name="senhaConfirm"
@@ -188,6 +226,7 @@ const FormCadastro = ({ onSuccess }: FormCadastroProps) => {
                         </FormItem>
                     )}
                 />
+
                 <FormField
                     control={form.control}
                     name="idPerfil"
@@ -212,15 +251,63 @@ const FormCadastro = ({ onSuccess }: FormCadastroProps) => {
                         </FormItem>
                     )}
                 />
-                <div className="w-full flex justify-end mt-8 col-span-2">
-                    <Button type="submit" className="w-1/2">
+
+                <FormField
+                    control={form.control}
+                    name="idSetores"
+                    render={() => (
+                        <FormItem>
+                            <FormControl>
+                                <>
+                                    <SelectPaginate
+                                        inputValue={searchSetores}
+                                        label="Pesquise pelo Setor."
+                                        options={setores}
+                                        placeholder=""
+                                        onInputValueChange={(e) => setSearchSetores(e)}
+                                        setSelecionadoSelect={(opt) => {
+                                            addSetor(opt); setSetores([]);
+                                            setSearchSetores("");
+                                        }}
+                                        clearInput={() => {
+                                            setSetores([]);
+                                            setSearchSetores("");
+                                        }}
+                                    />
+                                    <div className="mt-2 flex flex-wrap gap-2">
+                                        {selectedSetores.map((s) => (
+                                            <span
+                                                key={s.value}
+                                                className="inline-flex items-center rounded-full border border-[#136f63] px-2 py-1 text-sm"
+                                            >
+                                                {s.label}
+                                                <button
+                                                    type="button"
+                                                    className="ml-2 leading-none hover:text-red-600"
+                                                    onClick={() => removeSetor(s.value)}
+                                                    aria-label={`Remover ${s.label}`}
+                                                    title={`Remover ${s.label}`}
+                                                >
+                                                    ×
+                                                </button>
+                                            </span>
+                                        ))}
+                                    </div>
+                                </>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                <div className="w-full flex justify-end mt-8 col-span-3">
+                    <Button type="submit" className="w-full md:w-1/2">
                         Enviar
                     </Button>
                 </div>
-
             </form>
         </Form>
     );
-}
+};
 
 export { FormCadastro };

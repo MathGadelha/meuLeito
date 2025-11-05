@@ -9,10 +9,6 @@ type UserContextType = {
 		value: string[];
 		set: React.Dispatch<string[]>;
 	};
-	setor: {
-		value: string;
-		set: React.Dispatch<string>;
-	};
 	// userData: {
 	// 	value: UserData;
 	// 	set: React.Dispatch<UserData>;

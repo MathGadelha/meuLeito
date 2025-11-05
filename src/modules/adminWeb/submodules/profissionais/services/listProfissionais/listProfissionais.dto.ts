@@ -11,6 +11,10 @@ type userData = {
     Telefone: string | null,
     Perfil: string,
     IdPerfil: number
+    Setores: {
+        Id: number,
+        Nome: string
+    }[]
 }
 
 
