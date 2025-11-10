@@ -16,7 +16,7 @@ const formSchema = z.object({
         /^\d{4}\-\d{2}\-\d{2}$/,
         "Data inválida (formato: AAAA-MM-DD)"
     ),
-    sexo: z.enum(["M", "F"], { message: "Selecione o sexo" }),
+    sexo: z.string().min(1, "Selecione o sexo"),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -45,6 +45,7 @@ const FormCadastro = ({ onSuccess }: FormCadastroProps) => {
             }
             await usePacienteService.execute(params)
             form.reset();
+            form.setValue("sexo", "")
             onSuccess();
         } catch (error) {
             errorHandler(error);

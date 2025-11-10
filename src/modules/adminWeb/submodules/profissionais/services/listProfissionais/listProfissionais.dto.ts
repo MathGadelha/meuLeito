@@ -1,5 +1,14 @@
+type listProfissionaisInput = {
+    page: number;
+    pageSize: number;
+    nome: string
+}
+
 type listProfissionaisOutput = {
     data: userData[];
+    page: number;
+    pageSize: number;
+    total: number;
 }
 
 type userData = {
@@ -18,4 +27,4 @@ type userData = {
 }
 
 
-export type { listProfissionaisOutput, userData };
+export type { listProfissionaisInput, listProfissionaisOutput, userData };

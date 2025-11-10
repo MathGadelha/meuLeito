@@ -50,11 +50,6 @@ const LeitosAdminPage = () => {
                 setLeitoSelected(row);
                 setIsOpenLeitoDialog(true);
                 setTipo("E");
-                // localStorage.setItem(
-                // 	"@farmacias-selected-people",
-                // 	JSON.stringify({ ...row, convenio: convenio[0], nomeConvenio: convenio[1] })
-                // );
-                // navigate('/farmacias/selecao-beneficiario/triagem')
             },
         },
     ];

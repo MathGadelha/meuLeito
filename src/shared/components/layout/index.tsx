@@ -20,24 +20,15 @@ import { useUserContext } from "@shared/context/user/useUserContext";
 import { errorHandler } from "@api/errorHandler";
 import { useGetChamados } from "@shared/services/getChamados/getChamados.service";
 import { SetorDialog } from "@components/dialogSetor";
+import { chamadoData } from "@shared/services/getChamados/getChamados.dto";
+import { useVerifyIfHasProfileToAccessModule } from "@shared/hooks/validationsPerfis/useVerifyIfHasProfileToAccessModule";
+import { permissionsByModule } from "@shared/configs/permissionByModule";
 
 type Props = {
 	children: React.ReactNode;
 	sidebarButton: SidebarButton[];
 	breadcrumbs?: Breadcrumb[];
 	defaultDisabled?: boolean;
-};
-
-// tipo de cada notificação
-type Notif = {
-	chamadoId: number;
-	setorId?: number | string;
-	pacienteLeitoId?: number;
-	prioridade?: string | null;
-	mensagem?: string | null;
-	hora?: string;
-	nomePaciente?: string;
-	nomeLeito?: string;
 };
 
 const Layout = ({
@@ -51,11 +42,12 @@ const Layout = ({
 	const [isOpenSetorDialog, setIsOpenSetorDialog] = useState(false);
 
 	// 🆕 agora é ARRAY
-	const [notifications, setNotifications] = useState<Notif[]>([]);
+	const [notifications, setNotifications] = useState<chamadoData[]>([]);
 
 	const audioRef = useRef<HTMLAudioElement | null>(null);
 
 	const { user, setor } = useUserContext();
+	const { execute } = useVerifyIfHasProfileToAccessModule();
 
 	// carrega áudio 1x
 	useEffect(() => {
@@ -71,16 +63,17 @@ const Layout = ({
 		};
 	}, []);
 
-	// entrar na room e logar eventos
 	useEffect(() => {
 		if (!socket.connected) {
 			console.log("🔁 [socket] não estava conectado, conectando...");
 			socket.connect();
 		}
 
-		// depois troca para o setor do usuário logado
-		const SETOR_ID = setor.value
-		joinSetor(SETOR_ID);
+		const setorLocal = localStorage.getItem("@setorSelected");
+		if (!setorLocal) return;
+		const setorid = JSON.parse(setorLocal)
+		console.log(setorid.Id, "aquweqiuw")
+		joinSetor(setorid.Id);
 
 		const handleEntrou = (data: any) => {
 			console.log("✅ [socket] entrou_no_setor:", data);
@@ -115,7 +108,7 @@ const Layout = ({
 		const handleReceberChamado = (data: any) => {
 			console.log("🚨 [socket] chamado recebido:", data);
 
-			const newNotif: Notif = {
+			const newNotif: chamadoData = {
 				chamadoId: data.chamadoId,
 				setorId: data.IdSetor,
 				pacienteLeitoId: data.IdPacienteLeito,
@@ -162,7 +155,7 @@ const Layout = ({
 	}, []);
 
 	// aceitar UM chamado específico
-	const handleAcceptNotification = (notif: Notif) => {
+	const handleAcceptNotification = (notif: chamadoData) => {
 		console.log("Usuario", user.value);
 		if (!notif.chamadoId) return;
 		if (!user?.value?.id) {
@@ -189,20 +182,32 @@ const Layout = ({
 
 	async function getChamados() {
 		try {
+			console.log(execute(permissionsByModule.ADMIN), "passou????????????????")
+			if (execute(permissionsByModule.ADMIN)) return;
+			const setorLocal = localStorage.getItem("@setorSelected");
+			if (!setorLocal) return;
+			const setorid = JSON.parse(setorLocal);
 			const params = {
-				id_setor: 1
+				id_setor: setorid.Id
 			}
-			// const response = await useGetChamados.execute()
+			const response = await useGetChamados.execute(params)
+			setNotifications(prev => {
+				const merged = [...response.data, ...prev];
+				const seen = new Set<number>();
+				return merged.filter(c => !seen.has(c.chamadoId) && seen.add(c.chamadoId));
+			});
 		} catch (error) {
-			errorHandler(error);
+			console.log(error);
 		}
 	}
 
 	useEffect(() => {
-		getChamados();
 		const setorLocalStorage = localStorage.getItem("@setorSelected");
 		if (!setorLocalStorage) {
 			setIsOpenSetorDialog(true);
+		}
+		if (setorLocalStorage) {
+			getChamados();
 		}
 	}, [])
 
@@ -296,15 +301,12 @@ const Layout = ({
 					<ScrollArea className="w-full p-4">{children}</ScrollArea>
 				</div>
 			</div>
-
 			{isOpenDialog && (
 				<DialogLogout
 					isOpen={isOpenDialog}
 					onClose={() => setIsOpenDialog(false)}
 				/>
 			)}
-
-			{/* 🆕 lista de notificações */}
 			{notifications.length > 0 && (
 				<div className="fixed bottom-7 right-7 z-50 flex flex-col gap-4">
 					{notifications.map((notif) => (
@@ -319,7 +321,7 @@ const Layout = ({
 									<p className="font-semibold text-primary">
 										Paciente:{" "}
 										{notif.nomePaciente ||
-											`Paciente do leito ${notif.pacienteLeitoId ?? "?"}`}
+											`${notif.nomePaciente ?? "?"}`}
 									</p>
 									<p>
 										Leito: {notif.nomeLeito || notif.pacienteLeitoId || "—"}
@@ -350,6 +352,13 @@ const Layout = ({
 			{isOpenSetorDialog && <SetorDialog
 				isOpen={isOpenSetorDialog}
 				onOpenChange={setIsOpenSetorDialog}
+				onSucess={() => {
+					getChamados();
+					const setorLocal = localStorage.getItem("@setorSelected");
+					if (!setorLocal) return;
+					const setorid = JSON.parse(setorLocal);
+					joinSetor(setorid.Id);
+				}}
 			/>}
 		</div>
 	);

@@ -1,4 +1,4 @@
-import { userType } from "./userType";
+import { setorData, userType } from "./userType";
 
 type UserContextType = {
 	user: {
@@ -10,8 +10,8 @@ type UserContextType = {
 		set: React.Dispatch<string[]>;
 	};
 	setor: {
-		value: string;
-		set: React.Dispatch<string>;
+		value: setorData;
+		set: React.Dispatch<setorData>;
 	};
 	// userData: {
 	// 	value: UserData;

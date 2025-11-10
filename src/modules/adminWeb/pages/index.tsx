@@ -10,6 +10,8 @@ import { ListPacientes } from "../services/listPacientes/listPacientes.service";
 import { userData } from "../services/listPacientes/listPacientes.dto";
 import { PacienteDialog } from "../components/pacientDialog";
 import { Input } from "@components/ui/input";
+import { Pagination } from "@components/dataTable/pagination";
+import { usePagination } from "@shared/hooks/pagination/usePagination";
 
 
 const AdministradorPage = () => {
@@ -18,8 +20,10 @@ const AdministradorPage = () => {
 		{} as userData
 	);
 	const [pacientes, setPacientes] = useState<userData[]>([]);
-	const [search, setSearch] = useState<string>("");
+	const [searchPaciente, setSearchPaciente] = useState<string>("");
 	const [loading, setLoading] = useState<boolean>(false);
+
+	const { pageInfo, handleNextPage, handlePreviousPage, handleSelectPerPage } = usePagination()
 
 	const actionButton: ActionButton[] = [
 		{
@@ -36,8 +40,14 @@ const AdministradorPage = () => {
 	async function getPacientes() {
 		try {
 			setLoading(true);
-			const response = await ListPacientes.execute(search || "");
+			const params = {
+				page: pageInfo.value.page,
+				pageSize: pageInfo.value.perPage,
+				nome: searchPaciente
+			}
+			const response = await ListPacientes.execute(params);
 			setPacientes(response.data);
+			pageInfo.set((prev) => ({ ...prev, total: response.total }))
 		} catch (error) {
 			console.error("Erro ao buscar pessoas:", error);
 		} finally {
@@ -46,16 +56,12 @@ const AdministradorPage = () => {
 	}
 
 	useEffect(() => {
-		getPacientes();
-	}, []);
-
-	useEffect(() => {
 		const debounce = setTimeout(() => {
 			getPacientes();
 		}, 750);
 
 		return () => clearTimeout(debounce);
-	},[search])
+	}, [searchPaciente, pageInfo.value.page])
 
 	return (
 		<AdminWebLayout>
@@ -69,16 +75,21 @@ const AdministradorPage = () => {
 					<Input
 						className="w-full  border-none focus-visible:ring-0 focus-visible:ring-ring focus-visible:ring-offset-0"
 						onChange={(e) => {
-							setSearch(e.target.value)
+							setSearchPaciente(e.target.value)
 						}}
 						placeholder="Pesquise um paciente por nome"
 					/>
 				</div>
 				<DataTable
-					actionButtons={actionButton}
+					actions={actionButton}
 					columns={columnsPacientes}
 					data={pacientes}
 					isLoading={loading}
+				/>
+				<Pagination
+					pageInfo={pageInfo.value}
+					handleNextPage={handleNextPage}
+					handlePreviousPage={handlePreviousPage}
 				/>
 			</div>
 

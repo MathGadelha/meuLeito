@@ -13,9 +13,10 @@ import { Button } from "@components/ui/button";
 type dialogProp = {
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
+    onSucess: () => void;
 };
 
-const SetorDialog = ({ isOpen, onOpenChange }: dialogProp) => {
+const SetorDialog = ({ isOpen, onOpenChange, onSucess }: dialogProp) => {
 
     const { user } = useUserContext();
     const [setorSelected, setSetorSelected] = useState<{ Id: number; Nome: string } | null>(null);
@@ -23,6 +24,7 @@ const SetorDialog = ({ isOpen, onOpenChange }: dialogProp) => {
         try {
             localStorage.setItem("@setorSelected", JSON.stringify(setorSelected));
             onOpenChange(false)
+            onSucess()
         } catch (error) {
             errorHandler(error);
         }

@@ -1,5 +1,14 @@
+type listPacientesInput = {
+    page: number;
+    pageSize: number;
+    nome: string
+}
+
 type listPacientesOutput = {
     data: userData[];
+    page: number;
+    pageSize: number;
+    total: number;
 }
 
 type userData = {
@@ -15,4 +24,4 @@ type userData = {
 }
 
 
-export type { listPacientesOutput, userData };
+export type { listPacientesInput, listPacientesOutput, userData };

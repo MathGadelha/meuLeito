@@ -10,15 +10,30 @@ import { ExternalLink } from "lucide-react";
 import { leitosAdmin } from "@modules/adminLeitos/services/getLeitos/getLeitos.dto";
 import { useGetLeitos } from "@modules/adminLeitos/services/getLeitos/getLeitos.service";
 import { errorHandler } from "@api/errorHandler";
-
+import { permissionsByModule } from "@shared/configs/permissionByModule";
+import { useVerifyIfHasProfileToAccessModule } from "@shared/hooks/validationsPerfis/useVerifyIfHasProfileToAccessModule";
+import { useGetSetores } from "@modules/adminWeb/submodules/setores/services/getSetores/getSetores.service";
+import { FilterPopover } from "@components/filter/Filter";
+import { useUserContext } from "@shared/context/user/useUserContext";
+type FilterOptions = {
+	id: string;
+	label: string;
+}
 const LeitosPage = () => {
 	const [isOpenLeitoDialog, setIsOpenLeitoDialog] = useState(false);
 	const [leitoSelected, setLeitoSelected] = useState<leitosAdmin>(
 		{} as leitosAdmin
 	);
-
+	const [setores, setSetores] = useState<FilterOptions[]>([]);
 	const [leitos, setLeitos] = useState<leitosAdmin[]>([]);
 	const [loading, setLoading] = useState(false);
+	const [idSetor, setIdSetor] = useState<number>();
+	const [ocupados, setOcupados] = useState<number>();
+	const [livres, setLivres] = useState<number>();
+	const [manutencao, setManutencao] = useState<number>();
+
+	const { execute } = useVerifyIfHasProfileToAccessModule();
+	const { setor } = useUserContext();
 
 	const actionButton: ActionButton[] = [
 		{
@@ -36,17 +51,24 @@ const LeitosPage = () => {
 		},
 	];
 
-	async function listLeitos(search?: string) {
+	async function listLeitos() {
 		try {
 			setLoading(true);
 			const params = {
-				nome: search,
-				idSetor: undefined,
+				nome: "",
+				id_setor: idSetor,
 				status: undefined,
 				ativo: true
 			}
-			const response = await useGetLeitos.execute(params)
+			const response = await useGetLeitos.execute(params);
 			setLeitos(response.data);
+
+			const ocupados = response.data.filter((item) => item.Status === "Ocupado").length;
+			const livres = response.data.filter((item) => item.Status === "Livre").length;
+			const manutencao = response.data.filter((item) => item.Status === "Manutenção").length;
+			setOcupados(ocupados)
+			setLivres(livres)
+			setManutencao(manutencao)
 		} catch (error) {
 			errorHandler(error);
 		} finally {
@@ -54,9 +76,37 @@ const LeitosPage = () => {
 		}
 	}
 
+	async function listSetores(idSetor?: string) {
+		try {
+			const params = {
+				nome: "",
+				idSetor: idSetor,
+				status: undefined,
+				ativo: true
+			}
+			const response = await useGetSetores.execute(params)
+			setSetores(response.data.map(setor => ({
+				id: setor.Id.toString(),
+				label: setor.Nome
+			})));
+		} catch (error) {
+			errorHandler(error);
+		}
+	}
+
+
 	useEffect(() => {
-		listLeitos();
+		setIdSetor(setor.value.Id)
+		listSetores();
 	}, [])
+
+	useEffect(() => {
+		const debounce = setTimeout(() => {
+			listLeitos();
+		}, 750);
+
+		return () => clearTimeout(debounce);
+	}, [idSetor])
 
 	return (
 		<LeitoLayout>
@@ -67,21 +117,46 @@ const LeitosPage = () => {
 					loading={false}
 					cards={[
 						{
-							value: indicadores.livres,
+							value: livres,
 							label: "Leitos Disponíveis",
 						},
 						{
-							value: indicadores.ocupados,
+							value: ocupados,
 							label: "Leitos Ocupados",
 						},
 						{
-							value: indicadores.chamados_abertos,
-							label: "Chamados abertos",
+							value: manutencao,
+							label: "Leitos em Manutenção",
 						},
 					]}
 				/>
 			</div>
+
 			<div className="w-full h-full p-8">
+				<div className="mb-4">
+					{execute(permissionsByModule.ADMIN) &&
+						(<FilterPopover
+							variant={"default"}
+							key={"filter"}
+							clickFilter={(e) => {
+								if (e.itemsOfSelect && e.itemsOfSelect.length > 0) {
+									setIdSetor(Number(e.itemsOfSelect[0].id))
+								}
+							}}
+							style={{
+								width: "w-36",
+							}}
+							contentGroupSelect={[
+								{
+									defaultValues: idSetor?.toString(),
+									label: "Ordenação",
+									data: setores,
+								},
+							]}
+						/>)
+					}
+				</div>
+
 				<DataTable
 					actions={actionButton}
 					columns={columnsLeitos}

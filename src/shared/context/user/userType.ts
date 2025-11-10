@@ -3,8 +3,12 @@ type userType = {
     login: string,
     perfil: string,
     permissoes: string[]
-    setores: { Id: number, Nome: string }[]
-
+    setores: setorData[]
 }
 
-export type { userType };
+type setorData = {
+    Id: number,
+    Nome: string
+}
+
+export type { userType, setorData };

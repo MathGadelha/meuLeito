@@ -21,6 +21,7 @@ import { perfilData } from "../../services/listPerfis/listPerfis.dto";
 import { editProfissionaisService } from "../../services/putProfissionais/putProfissionais.service";
 import { InputMask } from "@components/inputMask";
 import { OptionSelectPaginate, SelectPaginate } from "@components/selectPaginate";
+import { useGetSetores } from "@modules/adminWeb/submodules/setores/services/getSetores/getSetores.service";
 
 type dialogProp = {
 	isOpen: boolean;
@@ -106,6 +107,19 @@ const ProfissionalDialog = ({ isOpen, onOpenChange, profissionalSelected, onSend
 		setSelectedSetores((prev) => prev.filter((s) => s.value !== value));
 	};
 
+	async function listSetores() {
+		try {
+			const response = await useGetSetores.execute({ nome: searchSetores });
+			const setoresOptions = response.data.map((setor) => ({
+				label: setor.Nome,
+				value: setor.Id.toString(),
+			}));
+			setSetores(setoresOptions);
+		} catch (error) {
+			errorHandler(error);
+		}
+	}
+
 	useEffect(() => {
 		form.setValue("nome", profissionalSelected.Nome);
 		form.setValue("cpf", profissionalSelected.CPF);
@@ -120,6 +134,13 @@ const ProfissionalDialog = ({ isOpen, onOpenChange, profissionalSelected, onSend
 			}))
 		);
 	}, [profissionalSelected]);
+
+	useEffect(() => {
+		const debounce = setTimeout(() => {
+			if (searchSetores) listSetores();
+		}, 750);
+		return () => clearTimeout(debounce);
+	}, [searchSetores]);
 
 	useEffect(() => {
 		getPerfis();

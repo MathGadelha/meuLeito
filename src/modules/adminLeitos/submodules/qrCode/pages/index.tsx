@@ -23,6 +23,7 @@ function QRGenerator() {
     const [leitoSelected, setLeitoSelected] = useState<leitosAdmin | null>(null);
     const [loading, setLoading] = useState(false);
     const [setores, setSetores] = useState<FilterOptions[]>([]);
+    const [idSetor, setIdSetor] = useState<number>();
 
     async function listLeitos(idSetor?: number) {
         try {
@@ -73,6 +74,15 @@ function QRGenerator() {
 
     }
 
+
+    useEffect(() => {
+        const debounce = setTimeout(() => {
+            listLeitos();
+        }, 750);
+
+        return () => clearTimeout(debounce);
+    }, [idSetor])
+
     useEffect(() => {
         listLeitos();
         listSetores();
@@ -90,7 +100,7 @@ function QRGenerator() {
                             key={"filter"}
                             clickFilter={(e) => {
                                 if (e.itemsOfSelect && e.itemsOfSelect.length > 0) {
-                                    listLeitos(Number(e.itemsOfSelect[0].id))
+                                    setIdSetor(Number(e.itemsOfSelect[0].id))
                                 }
                             }}
                             style={{
@@ -98,7 +108,7 @@ function QRGenerator() {
                             }}
                             contentGroupSelect={[
                                 {
-                                    defaultValues: "1",
+                                    defaultValues: idSetor?.toString(),
                                     label: "Ordenação",
                                     data: setores,
                                 },

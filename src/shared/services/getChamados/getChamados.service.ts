@@ -1,12 +1,12 @@
 import { AxiosInstance } from "axios";
 import { http } from "@api/https";
-import { chamadosInput } from "./getChamados.dto";
+import { chamadosInput, chamadosOutput } from "./getChamados.dto";
 
 class getChamados {
     constructor(private readonly api: AxiosInstance) { }
 
-    async execute(params: chamadosInput): Promise<any> {
-        const response = await this.api.get<any>("/chamados", { params });
+    async execute(params: chamadosInput): Promise<chamadosOutput> {
+        const response = await this.api.get<chamadosOutput>("/chamados/chamados-pendentes", { params });
 
         return response.data;
     }

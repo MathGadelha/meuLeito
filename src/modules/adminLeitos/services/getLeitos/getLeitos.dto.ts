@@ -1,6 +1,6 @@
 type leitosInPut = {
     nome?: string,
-    idSetor?: number,
+    id_setor?: number,
     status?: string,
     ativo?: boolean
 }
@@ -14,7 +14,7 @@ type leitosAdmin = {
     Nome: string,
     Descricao?: string,
     IdSetor: number,
-    nome_setor: string,
+    NomeSetor: string,
     Status: "Ocupado" | "Manutenção" | "Disponível" | "Livre",
     Ativo: boolean,
     nome_leito: string

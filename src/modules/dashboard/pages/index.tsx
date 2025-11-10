@@ -25,7 +25,7 @@ const DashBoardPage = () => {
 									title={item.title}
 									description={item.description}
 									path={item.path}
-								// disabled={!execute(item.permissions)}
+									disabled={!execute(item.permissions)}
 								/>
 							))}
 						</div>

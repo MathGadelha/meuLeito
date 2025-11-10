@@ -2,6 +2,7 @@ import { LuClipboardEdit } from "react-icons/lu";
 import { TbUserHeart } from "react-icons/tb";
 import { DashboardModule } from "../types/dashboardModules";
 import { permissionsByModule } from "@shared/configs/permissionByModule";
+import { GrUserAdmin } from "react-icons/gr";
 
 const ModulesDashboard = () => {
 	const modules: DashboardModule[] = [
@@ -31,7 +32,7 @@ const ModulesDashboard = () => {
 					disabled: true,
 					moduleAction: [],
 					assignedUsers: [],
-					icon: <LuClipboardEdit />,
+					icon: <GrUserAdmin />,
 				},
 			],
 		},

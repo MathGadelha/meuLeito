@@ -1,14 +1,20 @@
 type chamadosInput = {
-    id_leito: string;
+    id_setor: string;
 }
 
 type chamadosOutput = {
-    id_leito: string;
-    chamados: Array<{
-        id: string;
-        descricao: string;
-        status: string;
-    }>
+    data: chamadoData[]
 }
 
-export type { chamadosInput, chamadosOutput };
+type chamadoData = {
+    chamadoId: number;
+    setorId?: number | string;
+    pacienteLeitoId?: number;
+    prioridade?: string | null;
+    mensagem?: string | null;
+    hora?: string;
+    nomePaciente?: string;
+    nomeLeito?: string;
+}
+
+export type { chamadosInput, chamadosOutput, chamadoData };

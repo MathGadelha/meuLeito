@@ -10,6 +10,8 @@ import { columnsProfissionais } from "../components/profissionaisTableColumns";
 import { userData } from "../services/listProfissionais/listProfissionais.dto";
 import { ListProfissionais } from "../services/listProfissionais/listProfissionais.service";
 import { Input } from "@components/ui/input";
+import { usePagination } from "@shared/hooks/pagination/usePagination";
+import { Pagination } from "@components/dataTable/pagination";
 
 
 const ProfissionaisPage = () => {
@@ -19,10 +21,11 @@ const ProfissionaisPage = () => {
 	const [profissionalSeleted, setProfissionalSeleted] = useState<userData>({} as userData);
 	const [search, setSearch] = useState<string>("");
 	const [loading, setLoading] = useState<boolean>(false);
+	const { pageInfo, handleNextPage, handlePreviousPage } = usePagination()
 
 	const actionButton: ActionButton[] = [
 		{
-			label: "Editar paciente",
+			label: "Editar profissional",
 			icon: <UserRoundPen size={20} />,
 			onClick: (row: userData) => {
 				setIsOpenUserDialog(true);
@@ -35,9 +38,15 @@ const ProfissionaisPage = () => {
 	async function getProfissionais() {
 		try {
 			setLoading(true);
-			const response = await ListProfissionais.execute(search || "");
+			const params = {
+				page: pageInfo.value.page,
+				pageSize: pageInfo.value.perPage,
+				nome: search
+			}
+			const response = await ListProfissionais.execute(params);
 			console.log(response)
 			setProfissionais(response.data);
+			pageInfo.set((prev) => ({ ...prev, total: response.total }))
 		} catch (error) {
 			console.error("Erro ao buscar pessoas:", error);
 		} finally {
@@ -71,14 +80,19 @@ const ProfissionaisPage = () => {
 						onChange={(e) => {
 							setSearch(e.target.value);
 						}}
-						placeholder="Pesquise um paciente por nome"
+						placeholder="Pesquise um profissional por nome"
 					/>
 				</div>
 				<DataTable
-					actionButtons={actionButton}
+					actions={actionButton}
 					columns={columnsProfissionais}
 					data={profissionais}
 					isLoading={loading}
+				/>
+				<Pagination
+					pageInfo={pageInfo.value}
+					handleNextPage={handleNextPage}
+					handlePreviousPage={handlePreviousPage}
 				/>
 			</div>
 			{isOpenUserDialog && (

@@ -5,26 +5,22 @@ import { useEffect, useState } from "react";
 import { socket, joinSetor } from "@api/websocket";
 import { useGetPacienteLeitos } from "@modules/leitos/services/getPacienteLeito/getPacienteLeito.service";
 import { pacienteLeitoData } from "@modules/leitos/services/getPacienteLeito/getPacienteLeito.dto";
+import { useGetUltimoChamado } from "../services/getUltimoChamado/getUtimoChamado.service";
+import { ultimoChamadoData } from "../services/getUltimoChamado/getUltimoChamado.dto";
+import { finishChamado } from "../services/finalizarChamado/finalizarChamado.service";
+import { errorHandler } from "@api/errorHandler";
 
 const PacientesPage = () => {
     const pageParams = useParams();
     console.log("📄 Página do paciente ID:", pageParams.id);
-
+    const [finishing, setFinishing] = useState(false);
     const [pacienteLeito, setPacienteLeito] = useState<pacienteLeitoData>(
         {} as pacienteLeitoData
     );
     const [disabled, setDisabled] = useState(true);
 
-    // último chamado do paciente
-    const [lastCall, setLastCall] = useState<{
-        chamadoId?: number;
-        mensagem?: string | null;
-        prioridade?: string | null;
-        hora?: string;
-        status?: "ABERTO" | "CONFIRMADO" | "ERRO";
-    }>({});
+    const [lastCall, setLastCall] = useState<ultimoChamadoData>({});
 
-    // 🆕 controle do “form” de chamado
     const [showCallForm, setShowCallForm] = useState(false);
     const [selectedPriority, setSelectedPriority] = useState<"ALTA" | "MEDIA" | "BAIXA">("ALTA");
     const [observation, setObservation] = useState("");
@@ -34,17 +30,32 @@ const PacientesPage = () => {
             if (!pageParams.id) return;
             const response = await useGetPacienteLeitos.execute(pageParams.id);
             setPacienteLeito(response.data[0]);
+
+
         } catch (error) {
-            // errorHandler(error);
+            console.log("Erro no get de paciente")
         }
     }
 
-    // busca dados do leito
+    async function getUltimoChamado() {
+        try {
+            if (!pageParams.id) return;
+            const params = {
+                id_leito: pageParams.id
+            }
+            const response = await useGetUltimoChamado.execute(params);
+            setLastCall(response.data)
+
+        } catch (error) {
+            console.log("Erro no get de paciente")
+        }
+    }
+
     useEffect(() => {
         getPacienteLeito();
+        getUltimoChamado()
     }, [pageParams.id]);
 
-    // entrar na room do setor do paciente
     useEffect(() => {
         if (!pageParams.id) {
             console.log("⚠️ [socket] Nenhum id na rota, não vou entrar em room (paciente)");
@@ -86,49 +97,58 @@ const PacientesPage = () => {
         };
     }, [pacienteLeito, pageParams.id]);
 
-    // ouvir confirmações
     useEffect(() => {
-        // back confirmou que criou
         const handleChamadoEnviado = (data: any) => {
             console.log("✅ [socket] chamado_enviado (paciente):", data);
             setLastCall((prev) => ({
                 ...prev,
                 chamadoId: data.chamadoId,
-                status: "ABERTO",
+                status: "PENDENTE",
             }));
-            // esconde o form
             setShowCallForm(false);
-            // limpa observação
             setObservation("");
         };
 
-        // alguma enfermeira aceitou
         const handleChamadoAceito = (data: any) => {
             console.log("📩 [socket] chamado_aceito (paciente):", data);
             if (data.chamadoId === lastCall.chamadoId) {
                 setLastCall((prev) => ({
                     ...prev,
-                    status: "CONFIRMADO",
+                    status: "EM ATENDIMENTO",
                 }));
             }
         };
 
+        const handleChamadoFinalizado = (data: any) => {
+            console.log("🏁 [socket] chamado_finalizado (paciente):", data);
+            if (!lastCall.chamadoId || data.chamadoId !== lastCall.chamadoId) return;
+            setLastCall({});
+            setFinishing(false);
+        };
+
+        const handleErroFinalizar = (data: any) => {
+            console.log("❌ [socket] erro_finalizar_chamado (paciente):", data);
+            setFinishing(false);
+        };
+
         socket.on("chamado_enviado", handleChamadoEnviado);
         socket.on("chamado_aceito", handleChamadoAceito);
+        socket.on("chamado_finalizado", handleChamadoFinalizado);   // 🆕
+        socket.on("erro_finalizar_chamado", handleErroFinalizar);    // 🆕
 
         return () => {
             socket.off("chamado_enviado", handleChamadoEnviado);
             socket.off("chamado_aceito", handleChamadoAceito);
+            socket.off("chamado_finalizado", handleChamadoFinalizado); // 🆕
+            socket.off("erro_finalizar_chamado", handleErroFinalizar);  // 🆕
         };
     }, [lastCall.chamadoId]);
 
-    // abrir chamado -> agora só abre o form
     const handleOpenCall = () => {
         if (disabled) return;
         setShowCallForm(true);
     };
 
-    // enviar de verdade
     const handleSendCall = () => {
         if (!pacienteLeito.IdPaciente || !pacienteLeito.IdSetor) return;
 
@@ -148,11 +168,26 @@ const PacientesPage = () => {
             mensagem: payload.mensagem ?? undefined,
             prioridade: payload.prioridade,
             hora: new Date().toISOString(),
-            status: "ABERTO",
+            status: "PENDENTE",
         });
 
         socket.emit("novo_chamado", payload);
     };
+
+    async function handleFinishCall() {
+        if (finishing) return;
+        if (!lastCall.chamadoId || !pacienteLeito.IdSetor) return;
+
+        try {
+            await finishChamado.execute(lastCall.chamadoId.toString())
+            setFinishing(true);
+            getUltimoChamado()
+        } catch (erro) {
+            errorHandler(erro)
+        }
+
+    }
+
 
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -191,16 +226,38 @@ const PacientesPage = () => {
                                             : "agora"}
                                     </p>
                                     <p
-                                        className={
-                                            lastCall.status === "CONFIRMADO"
-                                                ? "mt-2 text-sm text-green-600 font-semibold"
-                                                : "mt-2 text-sm text-yellow-600 font-semibold"
-                                        }
+                                        className={"mt-2 text-sm text-yellow-600 font-semibold"}
                                     >
-                                        {lastCall.status === "CONFIRMADO"
-                                            ? "Enfermeira confirmou o atendimento ✅"
-                                            : "Aguardando confirmação da enfermagem..."}
+                                        {lastCall.status === "PENDENTE" && "Aguardando confirmação da enfermagem..."}
                                     </p>
+                                    <p
+                                        className={"mt-2 text-sm text-green-600 font-semibold"}
+                                    >
+                                        {lastCall.status === "EM ATENDIMENTO"
+                                            && "Enfermeira confirmou o atendimento ✅"}
+                                    </p>
+                                    <p
+                                        className={"mt-2 text-sm text-green-600 font-semibold"}
+                                    >
+                                        {lastCall.status === "CONCLUIDO"
+                                            && "Chamado finalizado com sucesso ✅"}
+
+                                    </p>
+                                    {lastCall.status === "EM ATENDIMENTO" && lastCall.chamadoId && (
+                                        <div className="mt-3">
+                                            <button
+                                                onClick={handleFinishCall}
+                                                disabled={finishing}
+                                                className="px-4 py-2 rounded-lg bg-indigo-600 text-white font-semibold hover:bg-indigo-700 disabled:bg-indigo-400 disabled:cursor-not-allowed"
+                                            >
+                                                {finishing ? "Finalizando..." : "Finalizar chamado"}
+                                            </button>
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                Use este botão quando o atendimento tiver sido concluído.
+                                            </p>
+                                        </div>
+                                    )}
+
                                 </>
                             ) : (
                                 <>
@@ -241,8 +298,6 @@ const PacientesPage = () => {
                             </div>
                         </section>
                     </main>
-
-                    {/* 🆕 "modal" simples de prioridade + observação */}
                     {showCallForm && (
                         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
                             <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 flex flex-col gap-4">

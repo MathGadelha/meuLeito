@@ -16,7 +16,7 @@ import { InserirPacienteLeitosFormSchema } from "@modules/leitos/schema/leitosFo
 import { pacienteLeitoData } from "@modules/leitos/services/getPacienteLeito/getPacienteLeito.dto";
 import { useGetPacienteLeitos } from "@modules/leitos/services/getPacienteLeito/getPacienteLeito.service";
 import dayjs from "dayjs";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@components/ui/form";
 import { z } from "zod";
@@ -89,7 +89,12 @@ const LeitoDialog = ({ isOpen, onOpenChange, leitoSelected, onSend }: dialogProp
 
 	const getPaciente = useCallback(async () => {
 		try {
-			const response = await ListPacientes.execute(searchPaciente);
+			const params = {
+				page: 1,
+				pageSize: 10,
+				nome: searchPaciente
+			}
+			const response = await ListPacientes.execute(params);
 			if (!mountedRef.current) return;
 			const pacientesOptions = response.data.map((paciente) => ({
 				label: labelPaciente(paciente),
@@ -204,7 +209,7 @@ const LeitoDialog = ({ isOpen, onOpenChange, leitoSelected, onSend }: dialogProp
 																		label="Pesquise pelo Paciente."
 																		options={pacientes}
 																		placeholder=""
-																		onInputValueChange={setSearchPaciente}
+																		onInputValueChange={(e) => setSearchPaciente(e)}
 																		setSelecionadoSelect={(e) =>
 																			formInserirPaciente.setValue(
 																				"id_paciente",
@@ -264,19 +269,24 @@ const LeitoDialog = ({ isOpen, onOpenChange, leitoSelected, onSend }: dialogProp
 											</div>
 
 											<div className="flex flex-col">
-												<label className="mb-1 text-zinc-700 dark:text-zinc-200">
-													Nome do leito de destino
-												</label>
-												<input
-													type="text"
-													value={leitoDestinoNome}
-													onChange={(e) => setLeitoDestinoNome(e.target.value)}
-													className="rounded-md border px-3 py-2 bg-white dark:bg-zinc-900 text-black dark:text-white"
-													placeholder="Ex.: Leito 203-B"
+												<SelectPaginate
+													inputValue={searchPaciente}
+													label="Pesquise pelo Paciente."
+													options={pacientes}
+													placeholder=""
+													onInputValueChange={(e) => setSearchPaciente(e)}
+													setSelecionadoSelect={(e) =>
+														formInserirPaciente.setValue(
+															"id_paciente",
+															e ? e.value : ""
+														)
+													}
+													clearInput={() => {
+														setPacientes([]);
+														formInserirPaciente.setValue("id_paciente", "");
+														setSearchPaciente("");
+													}}
 												/>
-												<small className="text-zinc-500 dark:text-zinc-400 mt-1">
-													Digite exatamente como está cadastrado.
-												</small>
 											</div>
 
 											<div className="w-full flex justify-end mt-2">
@@ -300,7 +310,7 @@ const LeitoDialog = ({ isOpen, onOpenChange, leitoSelected, onSend }: dialogProp
 									</p>
 
 									{leitoSelected?.Status === "Ocupado" && pacienteResumo && (
-										<div className="flex flex-row bg-zinc-100 dark:bg-zinc-800 p-4 rounded-lg shadow-sm">
+										<div className="flex flex-row justify-between bg-zinc-100 dark:bg-zinc-800 p-4 rounded-lg shadow-sm">
 											<div className="space-y-1">
 												<p>
 													<strong>Paciente:</strong> {pacienteResumo.nome}
@@ -319,7 +329,7 @@ const LeitoDialog = ({ isOpen, onOpenChange, leitoSelected, onSend }: dialogProp
 												</p>
 											</div>
 
-											<div className="flex flex-col justify-start gap-3 ml-8">
+											<div className="flex flex-col justify-end gap-3 ml-8">
 												<Button
 													className="mt-2 bg-primary hover:bg-[#032b43]"
 													onClick={() => {
