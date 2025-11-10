@@ -14,6 +14,15 @@ import { Tooltip } from "@components/tooltip";
 import { Separator } from "@components/ui/separator";
 import { LuLayoutDashboard } from "react-icons/lu";
 import notification from "@assets/audios/simple-notification-152054.mp3";
+import { FaCheck } from "react-icons/fa6";
+import { socket, joinSetor } from "@api/websocket";
+import { useUserContext } from "@shared/context/user/useUserContext";
+import { errorHandler } from "@api/errorHandler";
+import { useGetChamados } from "@shared/services/getChamados/getChamados.service";
+import { SetorDialog } from "@components/dialogSetor";
+import { chamadoData } from "@shared/services/getChamados/getChamados.dto";
+import { useVerifyIfHasProfileToAccessModule } from "@shared/hooks/validationsPerfis/useVerifyIfHasProfileToAccessModule";
+import { permissionsByModule } from "@shared/configs/permissionByModule";
 
 type Props = {
 	children: React.ReactNode;
@@ -30,32 +39,21 @@ const Layout = ({
 }: Props) => {
 	const navigate = useNavigate();
 	const [isOpenDialog, setIsOpenDialog] = useState(false);
+	const [isOpenSetorDialog, setIsOpenSetorDialog] = useState(false);
 
-	// estado da notificação
-	const [showNotification, setShowNotification] = useState(true);
+	// 🆕 agora é ARRAY
+	const [notifications, setNotifications] = useState<chamadoData[]>([]);
 
-	// referencia para o som
 	const audioRef = useRef<HTMLAudioElement | null>(null);
 
+	const { user, setor } = useUserContext();
+	const { execute } = useVerifyIfHasProfileToAccessModule();
+
+	// carrega áudio 1x
 	useEffect(() => {
-		// Verifica se a notificação foi fechada anteriormente
-		const notificationClosed = localStorage.getItem("notificationClosed");
-
-		// Se a notificação foi fechada, não exibe novamente
-		if (notificationClosed) {
-			setShowNotification(false);
-		}
-
-		audioRef.current = new Audio(notification);
-		audioRef.current.volume = 0.5;
-
-		// Tocar som na hora que a notificação for exibida
-		if (showNotification && audioRef.current) {
-			audioRef.current.currentTime = 0;
-			audioRef.current.play().catch(() => {
-				// Tentei reproduzir o som ao abrir a notificação
-			});
-		}
+		const audio = new Audio(notification);
+		audio.volume = 0.5;
+		audioRef.current = audio;
 
 		return () => {
 			if (audioRef.current) {
@@ -63,26 +61,155 @@ const Layout = ({
 				audioRef.current = null;
 			}
 		};
-	}, [showNotification]);
+	}, []);
 
 	useEffect(() => {
-		if (!showNotification) return;
+		if (!socket.connected) {
+			console.log("🔁 [socket] não estava conectado, conectando...");
+			socket.connect();
+		}
 
-		const interval = setInterval(() => {
+		const setorLocal = localStorage.getItem("@setorSelected");
+		if (!setorLocal) return;
+		const setorid = JSON.parse(setorLocal)
+		console.log(setorid.Id, "aquweqiuw")
+		joinSetor(setorid.Id);
+
+		const handleEntrou = (data: any) => {
+			console.log("✅ [socket] entrou_no_setor:", data);
+		};
+
+		const handleErro = (data: any) => {
+			console.log("❌ [socket] erro_setor:", data);
+		};
+
+		const handleSetoresRegistrados = (data: any) => {
+			console.log("📥 [socket] setores_registrados:", data);
+		};
+
+		const handleAny = (event: string, ...args: any[]) => {
+			console.log("👀 [socket:onAny]", event, args);
+		};
+
+		socket.on("entrou_no_setor", handleEntrou);
+		socket.on("erro_setor", handleErro);
+		socket.on("setores_registrados", handleSetoresRegistrados);
+		socket.onAny(handleAny);
+
+		return () => {
+			socket.off("entrou_no_setor", handleEntrou);
+			socket.off("erro_setor", handleErro);
+			socket.off("setores_registrados", handleSetoresRegistrados);
+			socket.offAny(handleAny);
+		};
+	}, []);
+
+	useEffect(() => {
+		const handleReceberChamado = (data: any) => {
+			console.log("🚨 [socket] chamado recebido:", data);
+
+			const newNotif: chamadoData = {
+				chamadoId: data.chamadoId,
+				setorId: data.IdSetor,
+				pacienteLeitoId: data.IdPacienteLeito,
+				prioridade: data.prioridade,
+				mensagem: data.mensagem,
+				hora: data.hora,
+				nomePaciente: data.NomePaciente,
+				nomeLeito: data.NomeLeito,
+			};
+
+			setNotifications((prev) => [newNotif, ...prev]);
+
 			if (audioRef.current) {
 				audioRef.current.currentTime = 0;
 				audioRef.current.play().catch(() => { });
 			}
-		}, 5000);
+		};
 
-		return () => clearInterval(interval);
-	}, [showNotification]);
+		const handleChamadoAceito = (data: any) => {
+			console.log("📩 [socket] chamado_aceito:", data);
+			const { chamadoId } = data;
+			setNotifications((prev) =>
+				prev.filter((n) => n.chamadoId !== chamadoId)
+			);
+		};
 
-	const handleCloseNotification = () => {
-		// Armazena no localStorage que a notificação foi fechada
-		localStorage.setItem("notificationClosed", "true");
-		setShowNotification(false);
+		socket.on("receber_chamado", handleReceberChamado);
+		socket.on("chamado_aceito", handleChamadoAceito);
+		socket.on("chamado_aceito_ok", (data: any) => {
+			console.log("✅ [socket] chamado_aceito_ok:", data);
+			// quem aceitou também remove (garantia)
+			if (data?.chamadoId) {
+				setNotifications((prev) =>
+					prev.filter((n) => n.chamadoId !== data.chamadoId)
+				);
+			}
+		});
+
+		return () => {
+			socket.off("receber_chamado", handleReceberChamado);
+			socket.off("chamado_aceito", handleChamadoAceito);
+			socket.off("chamado_aceito_ok");
+		};
+	}, []);
+
+	// aceitar UM chamado específico
+	const handleAcceptNotification = (notif: chamadoData) => {
+		console.log("Usuario", user.value);
+		if (!notif.chamadoId) return;
+		if (!user?.value?.id) {
+			console.warn("❗ sem id de profissional no contexto");
+			return;
+		}
+
+		console.log("📤 [socket] aceitar_chamado:", {
+			chamadoId: notif.chamadoId,
+			idProfissional: user.value.id,
+			setorId: notif.setorId,
+		});
+
+		socket.emit("aceitar_chamado", {
+			chamadoId: notif.chamadoId,
+			idProfissional: user.value.id,
+			setorId: notif.setorId,
+		});
+
+		setNotifications((prev) =>
+			prev.filter((n) => n.chamadoId !== notif.chamadoId)
+		);
 	};
+
+	async function getChamados() {
+		try {
+			console.log(execute(permissionsByModule.ADMIN), "passou????????????????")
+			if (execute(permissionsByModule.ADMIN)) return;
+			const setorLocal = localStorage.getItem("@setorSelected");
+			if (!setorLocal) return;
+			const setorid = JSON.parse(setorLocal);
+			const params = {
+				id_setor: setorid.Id
+			}
+			const response = await useGetChamados.execute(params)
+			setNotifications(prev => {
+				const merged = [...response.data, ...prev];
+				const seen = new Set<number>();
+				return merged.filter(c => !seen.has(c.chamadoId) && seen.add(c.chamadoId));
+			});
+		} catch (error) {
+			console.log(error);
+		}
+	}
+
+	useEffect(() => {
+		const setorLocalStorage = localStorage.getItem("@setorSelected");
+		if (!setorLocalStorage) {
+			setIsOpenSetorDialog(true);
+		}
+		if (setorLocalStorage) {
+			getChamados();
+		}
+	}, [])
 
 	return (
 		<div className="w-full h-screen flex relative">
@@ -95,7 +222,8 @@ const Layout = ({
 						onClick={() => navigate("/dashboard")}
 						className={cn(
 							"w-10 h-10 flex items-center justify-center rounded-full bg-secondary text-zinc-700 text-2xl hover:bg-[#063552] hover:text-zinc-900 focus:bg-[#063552] focus:text-white transition-all",
-							window.location.pathname === "/dashboard" && "bg-secondary text-white"
+							window.location.pathname === "/dashboard" &&
+							"bg-secondary text-white"
 						)}
 					>
 						<p className="text-slate-100">
@@ -140,6 +268,7 @@ const Layout = ({
 					</button>
 				</SidebarDrawer>
 			</aside>
+
 			<div className="w-[95%] bg-primary">
 				<header className="w-full h-[10%] flex items-center justify-between p-4">
 					<div className="flex items-center gap-3">
@@ -160,7 +289,9 @@ const Layout = ({
 									className="p-0 disabled:opacity-100"
 									onClick={() => navigate(item.path)}
 								>
-									<h2 className="text-2xl font-semibold text-white">{item.label}</h2>
+									<h2 className="text-2xl font-semibold text-white">
+										{item.label}
+									</h2>
 								</Button>
 							</div>
 						))}
@@ -176,22 +307,59 @@ const Layout = ({
 					onClose={() => setIsOpenDialog(false)}
 				/>
 			)}
-
-			{/* Exibe a notificação apenas se não foi fechada */}
-			{showNotification && (
-				<div
-					className="fixed bottom-7 right-7 z-50 rounded-3xl shadow-2xl border-[1px] border-primary p-4 flex flex-col items-center gap-4"
-					role="alert"
-				>
-					<p>Chamado para o leito 202</p>
-					<button
-						onClick={handleCloseNotification}
-						className="bg-primary w-full px-3 py-1 rounded transition text-white font-semibold flex items-center justify-center"
-					>
-						Confirmar
-					</button>
+			{notifications.length > 0 && (
+				<div className="fixed bottom-7 right-7 z-50 flex flex-col gap-4">
+					{notifications.map((notif) => (
+						<div
+							key={notif.chamadoId}
+							className="bg-white rounded-3xl shadow-2xl border-[1px] border-primary flex flex-col items-center"
+							role="alert"
+						>
+							<div className="flex flex-row justify-start items-center gap-4 py-2 px-4">
+								<img src={Logo} alt="Logo" className="w-20 mt-2 mb-2" />
+								<div className="">
+									<p className="font-semibold text-primary">
+										Paciente:{" "}
+										{notif.nomePaciente ||
+											`${notif.nomePaciente ?? "?"}`}
+									</p>
+									<p>
+										Leito: {notif.nomeLeito || notif.pacienteLeitoId || "—"}
+									</p>
+									{notif.mensagem && <p>{notif.mensagem}</p>}
+									{notif.prioridade && (
+										<p className="text-xs text-red-500">
+											Prioridade: {notif.prioridade}
+										</p>
+									)}
+									<p className="text-xs text-gray-400">
+										{notif.hora
+											? new Date(notif.hora).toLocaleString()
+											: "agora"}
+									</p>
+								</div>
+								<button
+									onClick={() => handleAcceptNotification(notif)}
+									className="bg-primary w-10 h-10 px-3 py-1 rounded transition text-white font-semibold flex items-center justify-center"
+								>
+									<FaCheck />
+								</button>
+							</div>
+						</div>
+					))}
 				</div>
 			)}
+			{isOpenSetorDialog && <SetorDialog
+				isOpen={isOpenSetorDialog}
+				onOpenChange={setIsOpenSetorDialog}
+				onSucess={() => {
+					getChamados();
+					const setorLocal = localStorage.getItem("@setorSelected");
+					if (!setorLocal) return;
+					const setorid = JSON.parse(setorLocal);
+					joinSetor(setorid.Id);
+				}}
+			/>}
 		</div>
 	);
 };

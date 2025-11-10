@@ -1,17 +1,17 @@
 import { Card } from "@components/ui/card";
 import { ApexOptions } from "apexcharts";
 import dayjs from "dayjs";
-import { useState } from "react";
+// import { useState } from "react";
 import ApexChart from "react-apexcharts";
-import { GoTasklist } from "react-icons/go";
+// import { GoTasklist } from "react-icons/go";
 
 function HeaderTasks() {
-    const [completed, setCompleted] = useState(26);
-    const [pending, setPeding] = useState(7);
-    const [delayed, setDelayed] = useState(1);
-    const [total, setTotal] = useState(34);
+    // const [completed, setCompleted] = useState(26);
+    // const [pending, setPeding] = useState(7);
+    // const [delayed, setDelayed] = useState(1);
+    // const [total, setTotal] = useState(34);
 
-    const series = [completed, pending, delayed];
+    // const series = [completed, pending, delayed];
 
     const date = dayjs().format("DD/MM/YYYY");
 
@@ -73,14 +73,14 @@ function HeaderTasks() {
                 <div className="flex flex-col w-2/4 items-center">
                     <ApexChart
                         options={options}
-                        series={series}
+                        series={[1, 2, 3]}
                         type="pie"
                         width={350}
                         height={350}
                     />
                 </div>
             </Card>
-            <p className="mb-5">Total de chamados: {total}</p>
+            <p className="mb-5">Total de chamados: {100}</p>
         </header>
     );
 }

@@ -1,3 +1,0 @@
-const permissionsByModule = {};
-
-export { permissionsByModule };

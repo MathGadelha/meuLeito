@@ -4,6 +4,7 @@ type LeitoSelected = {
 	leito: string;
 	leitoId: number;
 	paciente?: paciente;
+	chamados?: number;
 };
 
 type paciente = {

@@ -9,14 +9,17 @@ import { redirect } from "react-router-dom";
  */
 function useVerifyIfHasProfileToAccessModule() {
 	function execute(perfisByModule: string[]) {
-		const accessTokenStoraged = localStorage.getItem("@perfil");
+		const accessTokenStoraged = localStorage.getItem("@access_token");
 		if (!accessTokenStoraged) throw redirect("/login");
 
 		const userData = localStorage.getItem("@user_data");
+		console.log("userData", userData);
 		const parsedUserData: LoginOutputDto = userData
 			? JSON.parse(userData)
 			: null;
-		const perfil = parsedUserData?.perfil;
+		const perfil = Array.isArray(parsedUserData.usuario.perfil)
+			? parsedUserData.usuario.perfil
+			: [parsedUserData.usuario.perfil];
 
 		if (
 			perfisByModule.some((perfilByModule) =>

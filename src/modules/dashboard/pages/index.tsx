@@ -1,12 +1,12 @@
+import { useVerifyIfHasProfileToAccessModule } from "@shared/hooks/validationsPerfis/useVerifyIfHasProfileToAccessModule";
 import { DashBoardLayout } from "../components/dashboardLayout";
 import { ModuleCard } from "../components/moduleCard";
 import { ModulesDashboard } from "../mocks/dashboardModules";
-// import { useVerifyIfHasProfileToAccessModule } from "@shared/hooks/validationsPerfis/useVerifyIfHasProfileToAccessModule";
 import { DashboardItemModule } from "../types/dashboardModules";
 
 const DashBoardPage = () => {
 	const { modules } = ModulesDashboard();
-	// const { execute } = useVerifyIfHasProfileToAccessModule();
+	const { execute } = useVerifyIfHasProfileToAccessModule();
 
 	return (
 		<DashBoardLayout>
@@ -24,10 +24,8 @@ const DashBoardPage = () => {
 									icon={item.icon}
 									title={item.title}
 									description={item.description}
-									// moduleAction={item.moduleAction}
-									// assignedUsers={item.assignedUsers}
 									path={item.path}
-									// disabled={!execute(item.permissions)}
+									disabled={!execute(item.permissions)}
 								/>
 							))}
 						</div>
