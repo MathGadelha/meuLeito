@@ -11,8 +11,8 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { leitosAdmin } from "@modules/adminLeitos/services/getLeitos/getLeitos.dto";
 import { ListPacientes } from "@modules/adminWeb/services/listPacientes/listPacientes.service";
-import { defaultValuesInserirPacienteLeitos } from "@modules/leitos/schema/defaultValuesLeito";
-import { InserirPacienteLeitosFormSchema } from "@modules/leitos/schema/leitosFormSchema";
+import { defaultValuesInserirPacienteLeitos, defaultValuesTransferirPacienteLeitos } from "@modules/leitos/schema/defaultValuesLeito";
+import { InserirPacienteLeitosFormSchema, TransferirPacienteLeitosFormSchema } from "@modules/leitos/schema/leitosFormSchema";
 import { pacienteLeitoData } from "@modules/leitos/services/getPacienteLeito/getPacienteLeito.dto";
 import { useGetPacienteLeitos } from "@modules/leitos/services/getPacienteLeito/getPacienteLeito.service";
 import dayjs from "dayjs";
@@ -23,6 +23,7 @@ import { z } from "zod";
 import { CadastroSheet } from "../cadastroSheet";
 import { useInserirPacienteService } from "@modules/leitos/services/inserirPaciente/inserirPaciente.service";
 import { altaPacienteService } from "@modules/leitos/services/altaPaciente/altaPaciente.service";
+import { useGetLeitos } from "@modules/adminLeitos/services/getLeitos/getLeitos.service";
 
 type dialogProp = {
 	isOpen: boolean;
@@ -36,7 +37,9 @@ type TipoAcao = "E" | "A" | "T";
 const LeitoDialog = ({ isOpen, onOpenChange, leitoSelected, onSend }: dialogProp) => {
 
 	const [searchPaciente, setSearchPaciente] = useState("");
+	const [searchLeitos, setSearchLeitos] = useState("");
 	const [pacientes, setPacientes] = useState<OptionSelectPaginate[]>([]);
+	const [leitos, setLeitos] = useState<OptionSelectPaginate[]>([]);
 	const [showForm, setShowForm] = useState(false);
 	const [tipo, setTipo] = useState<TipoAcao>();
 	const [pacienteLeito, setPacienteLeito] = useState<pacienteLeitoData>({} as pacienteLeitoData);
@@ -51,6 +54,11 @@ const LeitoDialog = ({ isOpen, onOpenChange, leitoSelected, onSend }: dialogProp
 		defaultValues: defaultValuesInserirPacienteLeitos,
 	});
 
+	const formTransferirPaciente = useForm<z.infer<typeof TransferirPacienteLeitosFormSchema>>({
+		resolver: zodResolver(TransferirPacienteLeitosFormSchema),
+		defaultValues: defaultValuesTransferirPacienteLeitos,
+	});
+
 	const calcularIdade = useCallback((dataNascimento: string) => {
 		if (!dataNascimento) return 0;
 		const hoje = dayjs();
@@ -61,6 +69,12 @@ const LeitoDialog = ({ isOpen, onOpenChange, leitoSelected, onSend }: dialogProp
 	const labelPaciente = useCallback(
 		(p: { Nome: string; CPF: string; Nascimento: string }) =>
 			`${p.Nome}  -  ${p.CPF} - ${calcularIdade(p.Nascimento)} anos`,
+		[calcularIdade]
+	);
+
+	const labelLeito = useCallback(
+		(p: { Nome: string; NomeSetor: string; }) =>
+			`${p.Nome}  -  ${p.NomeSetor}`,
 		[calcularIdade]
 	);
 
@@ -105,6 +119,29 @@ const LeitoDialog = ({ isOpen, onOpenChange, leitoSelected, onSend }: dialogProp
 			errorHandler(error);
 		}
 	}, [searchPaciente, labelPaciente]);
+
+	async function listLeitos() {
+		try {
+			// setLoading(true);
+			const params = {
+				nome: searchLeitos,
+				id_setor: undefined,
+				status: undefined,
+				ativo: true
+			}
+			const response = await useGetLeitos.execute(params);
+			const leitosOptions = response.data.map((leito) => ({
+				label: labelLeito(leito),
+				value: leito.Id.toString(),
+			}));
+			setLeitos(leitosOptions);
+
+		} catch (error) {
+			errorHandler(error);
+		} finally {
+			// setLoading(false);
+		}
+	}
 
 	const onSubmitAdicionar = useCallback(async () => {
 		try {
@@ -161,6 +198,14 @@ const LeitoDialog = ({ isOpen, onOpenChange, leitoSelected, onSend }: dialogProp
 		}, 500);
 		return () => clearTimeout(debounce);
 	}, [isOpen, searchPaciente, getPaciente]);
+
+	useEffect(() => {
+		if (!isOpen) return;
+		const debounce = setTimeout(() => {
+			if (searchLeitos.trim()) listLeitos();
+		}, 500);
+		return () => clearTimeout(debounce);
+	}, [searchLeitos]);
 
 	return (
 		<Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -270,21 +315,21 @@ const LeitoDialog = ({ isOpen, onOpenChange, leitoSelected, onSend }: dialogProp
 
 											<div className="flex flex-col">
 												<SelectPaginate
-													inputValue={searchPaciente}
-													label="Pesquise pelo Paciente."
-													options={pacientes}
+													inputValue={searchLeitos}
+													label="Pesquise pelo Leito."
+													options={leitos}
 													placeholder=""
-													onInputValueChange={(e) => setSearchPaciente(e)}
+													onInputValueChange={(e) => setSearchLeitos(e)}
 													setSelecionadoSelect={(e) =>
-														formInserirPaciente.setValue(
-															"id_paciente",
+														formTransferirPaciente.setValue(
+															"id_leito",
 															e ? e.value : ""
 														)
 													}
 													clearInput={() => {
-														setPacientes([]);
-														formInserirPaciente.setValue("id_paciente", "");
-														setSearchPaciente("");
+														setLeitos([]);
+														formTransferirPaciente.setValue("id_leito", "");
+														setSearchLeitos("");
 													}}
 												/>
 											</div>

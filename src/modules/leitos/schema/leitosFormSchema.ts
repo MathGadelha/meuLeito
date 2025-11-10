@@ -6,4 +6,11 @@ const InserirPacienteLeitosFormSchema = z.object({
 	}),
 });
 
-export { InserirPacienteLeitosFormSchema };
+const TransferirPacienteLeitosFormSchema = z.object({
+	id_leito: z.string().min(1, {
+		message: "Você deve selecionar um leito",
+	}),
+});
+
+
+export { InserirPacienteLeitosFormSchema, TransferirPacienteLeitosFormSchema };

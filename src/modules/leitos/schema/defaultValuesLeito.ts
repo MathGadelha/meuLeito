@@ -1,9 +1,15 @@
 import { z } from "zod";
-import { InserirPacienteLeitosFormSchema } from "./leitosFormSchema";
+import { InserirPacienteLeitosFormSchema, TransferirPacienteLeitosFormSchema } from "./leitosFormSchema";
 
 const defaultValuesInserirPacienteLeitos: z.infer<typeof InserirPacienteLeitosFormSchema> = {
 	id_paciente: "",
 };
 
-export { defaultValuesInserirPacienteLeitos };
+const defaultValuesTransferirPacienteLeitos: z.infer<typeof TransferirPacienteLeitosFormSchema> = {
+	id_leito: "",
+};
+
+export { defaultValuesInserirPacienteLeitos, defaultValuesTransferirPacienteLeitos };
 typeof InserirPacienteLeitosFormSchema;
+typeof TransferirPacienteLeitosFormSchema;
+

@@ -89,7 +89,7 @@ const LeitoDialogAdmin = ({ isOpen, onOpenChange, leitoSelected, tipo, onSend }:
 		if (tipo === "C") return;
 		form.setValue("nome", leitoSelected.Nome);
 		form.setValue("setor", leitoSelected.IdSetor.toString());
-		setSearchSetores(leitoSelected.nome_setor);
+		setSearchSetores(leitoSelected.NomeSetor);
 		form.setValue("status", leitoSelected.Status);
 	}, [leitoSelected]);
 
