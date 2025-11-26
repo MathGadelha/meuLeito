@@ -1,5 +1,4 @@
 import { LeitoLayout } from "../components/layout";
-import { indicadores } from "../mocks/leitos";
 import { useEffect, useState } from "react";
 import { LeitoDialog } from "../components/leitoDialog";
 import { HeaderCard } from "../components/headerCard";
@@ -15,10 +14,8 @@ import { useVerifyIfHasProfileToAccessModule } from "@shared/hooks/validationsPe
 import { useGetSetores } from "@modules/adminWeb/submodules/setores/services/getSetores/getSetores.service";
 import { FilterPopover } from "@components/filter/Filter";
 import { useUserContext } from "@shared/context/user/useUserContext";
-type FilterOptions = {
-	id: string;
-	label: string;
-}
+import { FilterOptions } from "@shared/types/filterOptions";
+
 const LeitosPage = () => {
 	const [isOpenLeitoDialog, setIsOpenLeitoDialog] = useState(false);
 	const [leitoSelected, setLeitoSelected] = useState<leitosAdmin>(
@@ -42,11 +39,6 @@ const LeitosPage = () => {
 			onClick: (row: leitosAdmin) => {
 				setLeitoSelected(row);
 				setIsOpenLeitoDialog(true);
-				// localStorage.setItem(
-				// 	"@farmacias-selected-people",
-				// 	JSON.stringify({ ...row, convenio: convenio[0], nomeConvenio: convenio[1] })
-				// );
-				// navigate('/farmacias/selecao-beneficiario/triagem')
 			},
 		},
 	];

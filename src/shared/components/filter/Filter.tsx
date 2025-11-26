@@ -208,7 +208,7 @@ const FilterPopover = (data: FilterProps) => {
 														>
 															<FormControl>
 																<SelectTrigger>
-																	<SelectValue placeholder="Selecione uma especialidade" />
+																	<SelectValue placeholder="Selecione um setor" />
 																</SelectTrigger>
 															</FormControl>
 															<SelectContent className="max-h-64 overscroll-contain">

@@ -9,11 +9,13 @@ import { useGetUltimoChamado } from "../services/getUltimoChamado/getUtimoChamad
 import { ultimoChamadoData } from "../services/getUltimoChamado/getUltimoChamado.dto";
 import { finishChamado } from "../services/finalizarChamado/finalizarChamado.service";
 import { errorHandler } from "@api/errorHandler";
+import { Button } from "@components/ui/button";
 
 const PacientesPage = () => {
     const pageParams = useParams();
     console.log("📄 Página do paciente ID:", pageParams.id);
     const [finishing, setFinishing] = useState(false);
+    const [canceling, setCanceling] = useState(false);
     const [pacienteLeito, setPacienteLeito] = useState<pacienteLeitoData>(
         {} as pacienteLeitoData
     );
@@ -133,14 +135,14 @@ const PacientesPage = () => {
 
         socket.on("chamado_enviado", handleChamadoEnviado);
         socket.on("chamado_aceito", handleChamadoAceito);
-        socket.on("chamado_finalizado", handleChamadoFinalizado);   // 🆕
-        socket.on("erro_finalizar_chamado", handleErroFinalizar);    // 🆕
+        socket.on("chamado_finalizado", handleChamadoFinalizado);
+        socket.on("erro_finalizar_chamado", handleErroFinalizar);
 
         return () => {
             socket.off("chamado_enviado", handleChamadoEnviado);
             socket.off("chamado_aceito", handleChamadoAceito);
-            socket.off("chamado_finalizado", handleChamadoFinalizado); // 🆕
-            socket.off("erro_finalizar_chamado", handleErroFinalizar);  // 🆕
+            socket.off("chamado_finalizado", handleChamadoFinalizado);
+            socket.off("erro_finalizar_chamado", handleErroFinalizar);
         };
     }, [lastCall.chamadoId]);
 
@@ -173,6 +175,36 @@ const PacientesPage = () => {
 
         socket.emit("novo_chamado", payload);
     };
+
+    async function handleCancelCall() {
+        if (canceling) return;
+        setCanceling(true)
+        if (!lastCall.chamadoId || !pacienteLeito.IdSetor) return;
+
+        try {
+            const payload = {
+                chamadoId: lastCall.chamadoId,
+                setorId: pacienteLeito.IdSetor,
+            };
+
+            console.log("📞 emitindo cancelar chamado:", payload);
+
+            socket.emit("cancelar_chamado", payload);
+
+            setLastCall({
+                chamadoId: lastCall.chamadoId,
+                mensagem: lastCall.mensagem ?? undefined,
+                prioridade: lastCall.prioridade,
+                hora: lastCall.hora,
+                status: "CANCELADO",
+            });
+        } catch (erro) {
+            errorHandler(erro)
+        } finally {
+            setCanceling(false)
+        }
+
+    }
 
     async function handleFinishCall() {
         if (finishing) return;
@@ -243,6 +275,24 @@ const PacientesPage = () => {
                                             && "Chamado finalizado com sucesso ✅"}
 
                                     </p>
+                                    <p
+                                        className={"mt-2 text-sm text-green-600 font-semibold"}
+                                    >
+                                        {lastCall.status === "CANCELADO"
+                                            && "Chamado cancelado ❌"}
+                                    </p>
+                                    {lastCall.status === "PENDENTE" && lastCall.chamadoId && (
+                                        <div className="mt-3">
+                                            <Button
+                                                onClick={handleCancelCall}
+                                                disabled={canceling}
+                                                variant={"destructive"}
+                                                className="px-4 py-2 rounded-lg text-white font-semibold disabled:bg-red-400 disabled:cursor-not-allowed"
+                                            >
+                                                {canceling ? "Cancelando..." : "Cancelar"}
+                                            </Button>
+                                        </div>
+                                    )}
                                     {lastCall.status === "EM ATENDIMENTO" && lastCall.chamadoId && (
                                         <div className="mt-3">
                                             <button
@@ -253,7 +303,7 @@ const PacientesPage = () => {
                                                 {finishing ? "Finalizando..." : "Finalizar chamado"}
                                             </button>
                                             <p className="text-xs text-gray-500 mt-1">
-                                                Use este botão quando o atendimento tiver sido concluído.
+                                                Use este botão quando o atendimento estiver concluído.
                                             </p>
                                         </div>
                                     )}
@@ -276,7 +326,7 @@ const PacientesPage = () => {
                             <div className="grid grid-rows-1 gap-4">
                                 <button
                                     className="flex flex-row items-center justify-center gap-1 rounded-lg shadow-md p-6 bg-green-600 hover:bg-green-700 text-white disabled:bg-green-400 disabled:cursor-not-allowed"
-                                    disabled={disabled}
+                                    disabled={lastCall.status === "PENDENTE" || lastCall.status === "EM ATENDIMENTO"}
                                     onClick={handleOpenCall}
                                 >
                                     <SlCallOut className="w-10 h-10" />
