@@ -151,7 +151,7 @@ const ProfissionalDialog = ({ isOpen, onOpenChange, profissionalSelected, onSend
 			<DialogContent className="max-w-[600px]">
 				<DialogHeader>
 					<DialogTitle className="flex justify-between">
-						Edição de Paciente
+						Edição de Profissional
 					</DialogTitle>
 					<DialogDescription>
 						<div className="flex flex-col">

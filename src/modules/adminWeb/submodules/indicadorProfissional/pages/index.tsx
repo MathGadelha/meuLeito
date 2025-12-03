@@ -6,17 +6,38 @@ import { errorHandler } from "@api/errorHandler";
 import { visaoOutput } from "../services/visaoGera/visaoGeral.dto";
 import { FilterPopover } from "@components/filter/Filter";
 import { useGetSetores } from "../../setores/services/getSetores/getSetores.service";
-
-type FilterOptions = {
-    id: string;
-    label: string;
-}
+import {
+    BarChart,
+    Bar,
+    XAxis,
+    YAxis,
+    Tooltip,
+    ResponsiveContainer,
+} from "recharts";
+import { FilterOptions } from "@shared/types/filterOptions";
+import dayjs from "dayjs";
+import { useChamadosIntervalo } from "../services/getChamadosIntervalo/getChamadosIntervalo.service";
+import { chamadosIntervaloOutPut } from "../services/getChamadosIntervalo/getChamadosIntervalo.dto";
+import { useChamadosTipo } from "../services/getChamadosTipo/getChamadosTipo.service";
+import { chamadosTipoOutPut } from "../services/getChamadosTipo/getChamadosTipo.dto";
 
 const IndicadorProfissionalPage = () => {
 
     const [dados, setDados] = useState<visaoOutput>({} as visaoOutput)
     const [idSetor, setIdSetor] = useState<number>();
     const [setores, setSetores] = useState<FilterOptions[]>([]);
+    // const [loading, setLoading] = useState(false);
+    // const [dadosSetor, setDadosSetor] = useState<chamadosSetorOutPut>()
+    const [dadosIntervalo, setDadosIntervalo] = useState<chamadosIntervaloOutPut[]>([])
+    const [dadosTipo, setDadosTipo] = useState<chamadosTipoOutPut[]>([])
+
+    const dadosTeste = [
+        { status: "Abertos", qtd: dados.pendentes },
+        { status: "Em atendimento", qtd: dados.aceitos },
+        { status: "Concluídos", qtd: dados.concluidos },
+        { status: "Cancelados", qtd: dados.cancelados },
+    ];
+
 
     async function getVisaoGeral() {
         try {
@@ -25,6 +46,48 @@ const IndicadorProfissionalPage = () => {
             }
             const result = await useVisaoGeral.execute(params)
             setDados(result)
+        } catch (error) {
+            errorHandler(error)
+        }
+    }
+
+    // async function getChamadosSetor() {
+    //     try {
+    //         const params = {
+    //             init: dayjs().format("YYYY-MM-DD"),
+    //             fim: dayjs().format("YYYY-MM-DD"),
+    //             id_setor: idSetor!
+    //         }
+    //         const result = await useChamadosSetor.execute(params)
+    //         setDadosSetor(result)
+    //     } catch (error) {
+    //         errorHandler(error)
+    //     }
+    // }
+
+    async function getChamadosIntervalo() {
+        try {
+            const params = {
+                init: dayjs().format("YYYY-MM-DD"),
+                fim: dayjs().format("YYYY-MM-DD"),
+                id_setor: idSetor!
+            }
+            const result = await useChamadosIntervalo.execute(params)
+            setDadosIntervalo(result)
+        } catch (error) {
+            errorHandler(error)
+        }
+    }
+
+    async function getChamadosTipo() {
+        try {
+            const params = {
+                init: dayjs().format("YYYY-MM-DD"),
+                fim: dayjs().format("YYYY-MM-DD"),
+                id_setor: idSetor!
+            }
+            const result = await useChamadosTipo.execute(params)
+            setDadosTipo(result)
         } catch (error) {
             errorHandler(error)
         }
@@ -48,6 +111,23 @@ const IndicadorProfissionalPage = () => {
         }
     }
 
+    // async function getChamadosEnfermeiros() {
+    //     try {
+    //         setLoading(true)
+    //         const params = {
+    //             page: pageInfo.value.page,
+    //             pageSize: 10
+    //         }
+    //         const result = await useChamadosEnfermeiros.execute(params)
+    //         setChamados(result.data)
+    //     } catch (error) {
+    //         errorHandler(error)
+    //     } finally {
+    //         setLoading(false)
+    //     }
+    // }
+
+
     useEffect(() => {
         const debounce = setTimeout(() => {
             getVisaoGeral();
@@ -59,6 +139,9 @@ const IndicadorProfissionalPage = () => {
     useEffect(() => {
         getVisaoGeral()
         listSetores()
+        // getChamadosSetor()
+        getChamadosIntervalo()
+        getChamadosTipo()
     }, [])
 
     return (
@@ -80,6 +163,14 @@ const IndicadorProfissionalPage = () => {
                         {
                             value: dados.pendentes,
                             label: "Chamados pendentes",
+                        },
+                        {
+                            value: dados.concluidos,
+                            label: "Chamados concluídos",
+                        },
+                        {
+                            value: dados.cancelados,
+                            label: "Chamados cancelados",
                         },
                     ]}
                 />
@@ -103,13 +194,76 @@ const IndicadorProfissionalPage = () => {
                     },
                 ]}
             />
-            {/* <div>
-                <DataTable
-                    columns={columnsProfissionais}
-                    data={profissionais}
-                />
-            </div> */}
-
+            <section className="w-full flex justify-center items-center my-5">
+                <div className="w-full rounded-2xl border border-slate-800 p-4">
+                    <h2 className="text-lg font-semibold mb-4">
+                        Chamados por setor
+                    </h2>
+                    <div className="w-full h-64">
+                        <ResponsiveContainer className="bg-white" width="100%" height="100%">
+                            <BarChart data={dadosTeste} >
+                                <XAxis dataKey="status" stroke="#1e293b" />
+                                <YAxis stroke="#1e293b" />
+                                <Tooltip
+                                    contentStyle={{
+                                        backgroundColor: "#FFF",
+                                        border: "1px solid #1e293b",
+                                        borderRadius: 8,
+                                        color: "#1e293b",
+                                    }}
+                                />
+                                <Bar dataKey="qtd" fill="#136f63" radius={[8, 8, 0, 0]} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+            </section>
+            <section className="flex justify-center items-center grid grid-cols-1 lg:grid-cols-2 gap-6 my-5">
+                <div className="rounded-2xl border border-slate-800 p-4">
+                    <h2 className="text-lg font-semibold mb-4">
+                        Chamados por intervalo de tempo
+                    </h2>
+                    <div className="h-64">
+                        <ResponsiveContainer className="bg-white" width="100%" height="100%">
+                            <BarChart data={dadosIntervalo} >
+                                <XAxis dataKey="label" stroke="#1e293b" />
+                                <YAxis stroke="#1e293b" />
+                                <Tooltip
+                                    contentStyle={{
+                                        backgroundColor: "#FFF",
+                                        border: "1px solid #1e293b",
+                                        borderRadius: 8,
+                                        color: "#1e293b",
+                                    }}
+                                />
+                                <Bar dataKey="total" fill="#136f63" radius={[8, 8, 0, 0]} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+                <div className="rounded-2xl border border-slate-800 p-4">
+                    <h2 className="text-lg font-semibold mb-4">
+                        Chamados por tipo
+                    </h2>
+                    <div className="h-64">
+                        <ResponsiveContainer className="bg-white" width="100%" height="100%">
+                            <BarChart data={dadosTipo} >
+                                <XAxis dataKey="tipo" stroke="#1e293b" />
+                                <YAxis stroke="#1e293b" />
+                                <Tooltip
+                                    contentStyle={{
+                                        backgroundColor: "#FFF",
+                                        border: "1px solid #1e293b",
+                                        borderRadius: 8,
+                                        color: "#1e293b",
+                                    }}
+                                />
+                                <Bar dataKey="total" fill="#136f63" radius={[8, 8, 0, 0]} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+            </section>
         </AdminWebLayout>
     );
 };

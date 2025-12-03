@@ -24,6 +24,7 @@ import { CadastroSheet } from "../cadastroSheet";
 import { useInserirPacienteService } from "@modules/leitos/services/inserirPaciente/inserirPaciente.service";
 import { altaPacienteService } from "@modules/leitos/services/altaPaciente/altaPaciente.service";
 import { useGetLeitos } from "@modules/adminLeitos/services/getLeitos/getLeitos.service";
+import { transferirPacienteService } from "@modules/leitos/services/transferirPaciente/transferirPaciente.service";
 
 type dialogProp = {
 	isOpen: boolean;
@@ -45,7 +46,7 @@ const LeitoDialog = ({ isOpen, onOpenChange, leitoSelected, onSend }: dialogProp
 	const [pacienteLeito, setPacienteLeito] = useState<pacienteLeitoData>({} as pacienteLeitoData);
 	const [cadastroSheet, setCadastroSheet] = useState(false);
 
-	const [leitoDestinoNome, setLeitoDestinoNome] = useState("");
+	// const [leitoDestinoNome, setLeitoDestinoNome] = useState("");
 
 	const mountedRef = useRef(false);
 
@@ -116,7 +117,7 @@ const LeitoDialog = ({ isOpen, onOpenChange, leitoSelected, onSend }: dialogProp
 			}));
 			setPacientes(pacientesOptions);
 		} catch (error) {
-			errorHandler(error);
+			console.log(error);
 		}
 	}, [searchPaciente, labelPaciente]);
 
@@ -167,14 +168,16 @@ const LeitoDialog = ({ isOpen, onOpenChange, leitoSelected, onSend }: dialogProp
 
 	const onSubmitTransferencia = useCallback(async () => {
 		try {
-			if (!pacienteLeito?.IdPaciente) throw new Error("Paciente não encontrado para transferência.");
-			if (!leitoDestinoNome?.trim()) throw new Error("Informe o nome do leito de destino.");
-
+			const params = {
+				id_paciente: pacienteLeito.IdPaciente,
+				id_leito: Number(formTransferirPaciente.getValues("id_leito"))
+			}
+			await transferirPacienteService.execute(pacienteLeito.Id.toString(), params)
 			onSend();
 		} catch (error) {
-			errorHandler(error);
+			errorHandler("error");
 		}
-	}, [leitoDestinoNome, pacienteLeito?.IdPaciente, leitoSelected?.Id, onSend]);
+	}, [pacienteLeito?.IdPaciente, leitoSelected?.Id, onSend]);
 
 	useEffect(() => {
 		mountedRef.current = true;
@@ -368,9 +371,6 @@ const LeitoDialog = ({ isOpen, onOpenChange, leitoSelected, onSend }: dialogProp
 												</p>
 												<p>
 													<strong>Sexo:</strong> {pacienteResumo.sexo}
-												</p>
-												<p className="text-sm text-zinc-600 dark:text-zinc-400 mt-2">
-													Clique em um dos botões para prosseguir.
 												</p>
 											</div>
 

@@ -23,7 +23,7 @@ const AdministradorPage = () => {
 	const [searchPaciente, setSearchPaciente] = useState<string>("");
 	const [loading, setLoading] = useState<boolean>(false);
 
-	const { pageInfo, handleNextPage, handlePreviousPage, handleSelectPerPage } = usePagination()
+	const { pageInfo, handleNextPage, handlePreviousPage } = usePagination()
 
 	const actionButton: ActionButton[] = [
 		{

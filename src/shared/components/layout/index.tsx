@@ -17,7 +17,6 @@ import notification from "@assets/audios/simple-notification-152054.mp3";
 import { FaCheck } from "react-icons/fa6";
 import { socket, joinSetor } from "@api/websocket";
 import { useUserContext } from "@shared/context/user/useUserContext";
-import { errorHandler } from "@api/errorHandler";
 import { useGetChamados } from "@shared/services/getChamados/getChamados.service";
 import { SetorDialog } from "@components/dialogSetor";
 import { chamadoData } from "@shared/services/getChamados/getChamados.dto";
@@ -46,7 +45,7 @@ const Layout = ({
 
 	const audioRef = useRef<HTMLAudioElement | null>(null);
 
-	const { user, setor } = useUserContext();
+	const { user } = useUserContext();
 	const { execute } = useVerifyIfHasProfileToAccessModule();
 
 	// carrega áudio 1x
@@ -135,8 +134,26 @@ const Layout = ({
 			);
 		};
 
+		const handleChamadoCancelado = (data: any) => {
+			console.log("📩 [socket] chamado_cancelado:", data);
+			const { chamadoId } = data;
+			setNotifications((prev) =>
+				prev.filter((n) => n.chamadoId !== chamadoId)
+			);
+		};
+
+		const handleChamadoEncerrado = (data: any) => {
+			console.log("📩 [socket] chamado_cancelado:", data);
+			const { chamadoId } = data;
+			setNotifications((prev) =>
+				prev.filter((n) => n.chamadoId !== chamadoId)
+			);
+		};
+
 		socket.on("receber_chamado", handleReceberChamado);
 		socket.on("chamado_aceito", handleChamadoAceito);
+		socket.on("chamado_cancelado", handleChamadoCancelado);
+		socket.on("chamado_encerrado_auto", handleChamadoEncerrado);
 		socket.on("chamado_aceito_ok", (data: any) => {
 			console.log("✅ [socket] chamado_aceito_ok:", data);
 			// quem aceitou também remove (garantia)
@@ -182,7 +199,6 @@ const Layout = ({
 
 	async function getChamados() {
 		try {
-			console.log(execute(permissionsByModule.ADMIN), "passou????????????????")
 			if (execute(permissionsByModule.ADMIN)) return;
 			const setorLocal = localStorage.getItem("@setorSelected");
 			if (!setorLocal) return;

@@ -8,11 +8,7 @@ import { Card } from "@components/ui/card";
 import { Separator } from "@components/ui/separator";
 import { FilterPopover } from "@components/filter/Filter";
 import { useGetSetores } from "@modules/adminWeb/submodules/setores/services/getSetores/getSetores.service";
-
-type FilterOptions = {
-    id: string;
-    label: string;
-}
+import { FilterOptions } from "@shared/types/filterOptions";
 
 function QRGenerator() {
     const [fg, setFg] = useState("#111111");
@@ -30,7 +26,7 @@ function QRGenerator() {
             setLoading(true);
             const params = {
                 nome: "",
-                idSetor: idSetor,
+                id_setor: idSetor,
                 status: undefined,
                 ativo: true
             }
@@ -142,7 +138,7 @@ function QRGenerator() {
                                             <input type="color" value={fg} onChange={(e) => setFg(e.target.value)} style={{ width: "100%" }} />
                                         </div>
                                         <QRCodeCanvas
-                                            value={"https://app-meuleito.com/paciente/" + leitoSelected.Id}
+                                            value={"https://app-meuleito.com.br/paciente/" + leitoSelected.Id}
                                             size={310}
                                             level={"H"}
                                             fgColor={fg}

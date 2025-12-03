@@ -9,6 +9,7 @@ type chamadosOutput = {
 type ultimoChamadoData = {
     chamadoId?: number;
     mensagem?: string | null;
+    tipo?: string | null
     prioridade?: string | null;
     hora?: string;
     status?: string;
