@@ -1,6 +1,6 @@
 import React, { createContext, useEffect, useState } from "react";
 import { UserContextType } from "./userContextType";
-import { userType } from "./userType";
+import { setorData, userType } from "./userType";
 // import { UserData } from "@modules/gestaoProfissionais/interfaces/userData";
 
 const UserContext = createContext<UserContextType>({} as UserContextType);
@@ -18,7 +18,7 @@ const UserContextProvider = ({ children }: { children: React.ReactNode }) => {
 		return JSON.parse(perfilLocalStorage);
 	});
 
-	const [setor, setSetor] = useState<string>(() => {
+	const [setor, setSetor] = useState<setorData>(() => {
 		const setorLocalStorage = localStorage.getItem("@setorSelected");
 		if (!setorLocalStorage) return "";
 		return JSON.parse(setorLocalStorage);

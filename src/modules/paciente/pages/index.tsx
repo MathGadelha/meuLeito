@@ -11,9 +11,15 @@ import { finishChamado } from "../services/finalizarChamado/finalizarChamado.ser
 import { errorHandler } from "@api/errorHandler";
 import { Button } from "@components/ui/button";
 
+type chamadoTipos = {
+    tipo: string;
+    prioridade: string;
+};
+
 const PacientesPage = () => {
     const pageParams = useParams();
     console.log("📄 Página do paciente ID:", pageParams.id);
+
     const [finishing, setFinishing] = useState(false);
     const [canceling, setCanceling] = useState(false);
     const [pacienteLeito, setPacienteLeito] = useState<pacienteLeitoData>(
@@ -22,20 +28,55 @@ const PacientesPage = () => {
     const [disabled, setDisabled] = useState(true);
 
     const [lastCall, setLastCall] = useState<ultimoChamadoData>({});
-
     const [showCallForm, setShowCallForm] = useState(false);
-    const [selectedPriority, setSelectedPriority] = useState<"ALTA" | "MEDIA" | "BAIXA">("ALTA");
+    const [selectedChamado, setSelectedChamado] = useState<chamadoTipos>();
     const [observation, setObservation] = useState("");
+
+    // 🔄 Loading enquanto getPacienteLeito roda
+    const [loadingPaciente, setLoadingPaciente] = useState(true);
+
+    const tiposChamados = [
+        {
+            tipo: "SOS",
+            prioridade: "ALTA",
+        },
+        {
+            tipo: "DORES",
+            prioridade: "ALTA",
+        },
+        {
+            tipo: "ATENDIMENTO",
+            prioridade: "BAIXA",
+        },
+        {
+            tipo: "ALIMENTACAO",
+            prioridade: "MEDIA",
+        },
+        {
+            tipo: "AGUA",
+            prioridade: "BAIXA",
+        },
+
+        {
+            tipo: "OUTROS",
+            prioridade: "BAIXA",
+        },
+    ];
 
     async function getPacienteLeito() {
         try {
-            if (!pageParams.id) return;
+            if (!pageParams.id) {
+                setLoadingPaciente(false);
+                return;
+            }
+
+            setLoadingPaciente(true);
             const response = await useGetPacienteLeitos.execute(pageParams.id);
             setPacienteLeito(response.data[0]);
-
-
         } catch (error) {
-            console.log("Erro no get de paciente")
+            console.log("Erro no get de paciente");
+        } finally {
+            setLoadingPaciente(false);
         }
     }
 
@@ -43,24 +84,25 @@ const PacientesPage = () => {
         try {
             if (!pageParams.id) return;
             const params = {
-                id_leito: pageParams.id
-            }
+                id_leito: pageParams.id,
+            };
             const response = await useGetUltimoChamado.execute(params);
-            setLastCall(response.data)
-
+            setLastCall(response.data);
         } catch (error) {
-            console.log("Erro no get de paciente")
+            console.log("Erro no get de paciente");
         }
     }
 
     useEffect(() => {
         getPacienteLeito();
-        getUltimoChamado()
+        getUltimoChamado();
     }, [pageParams.id]);
 
     useEffect(() => {
         if (!pageParams.id) {
-            console.log("⚠️ [socket] Nenhum id na rota, não vou entrar em room (paciente)");
+            console.log(
+                "⚠️ [socket] Nenhum id na rota, não vou entrar em room (paciente)"
+            );
             return;
         }
 
@@ -70,7 +112,10 @@ const PacientesPage = () => {
         }
 
         if (pacienteLeito.IdSetor) {
-            console.log("📤 [socket] entrando no setor (paciente):", pacienteLeito.IdSetor);
+            console.log(
+                "📤 [socket] entrando no setor (paciente):",
+                pacienteLeito.IdSetor
+            );
             joinSetor(pacienteLeito.IdSetor);
         }
 
@@ -147,17 +192,18 @@ const PacientesPage = () => {
     }, [lastCall.chamadoId]);
 
     const handleOpenCall = () => {
-        if (disabled) return;
         setShowCallForm(true);
     };
 
     const handleSendCall = () => {
         if (!pacienteLeito.IdPaciente || !pacienteLeito.IdSetor) return;
+        if (!selectedChamado) return; // garante que selecionou um tipo
 
         const payload = {
             id_paciente_leito: pacienteLeito.Id,
             setorId: pacienteLeito.IdSetor,
-            prioridade: selectedPriority,
+            prioridade: selectedChamado.prioridade,
+            tipo: selectedChamado.tipo,
             mensagem: observation || null,
             nomePaciente: pacienteLeito.NomePaciente,
             nomeLeito: pacienteLeito.NomeLeito,
@@ -168,7 +214,7 @@ const PacientesPage = () => {
         setLastCall({
             chamadoId: undefined,
             mensagem: payload.mensagem ?? undefined,
-            prioridade: payload.prioridade,
+            tipo: payload.tipo,
             hora: new Date().toISOString(),
             status: "PENDENTE",
         });
@@ -178,7 +224,7 @@ const PacientesPage = () => {
 
     async function handleCancelCall() {
         if (canceling) return;
-        setCanceling(true)
+        setCanceling(true);
         if (!lastCall.chamadoId || !pacienteLeito.IdSetor) return;
 
         try {
@@ -199,11 +245,10 @@ const PacientesPage = () => {
                 status: "CANCELADO",
             });
         } catch (erro) {
-            errorHandler(erro)
+            errorHandler(erro);
         } finally {
-            setCanceling(false)
+            setCanceling(false);
         }
-
     }
 
     async function handleFinishCall() {
@@ -211,15 +256,25 @@ const PacientesPage = () => {
         if (!lastCall.chamadoId || !pacienteLeito.IdSetor) return;
 
         try {
-            await finishChamado.execute(lastCall.chamadoId.toString())
+            await finishChamado.execute(lastCall.chamadoId.toString());
             setFinishing(true);
-            getUltimoChamado()
+            getUltimoChamado();
         } catch (erro) {
-            errorHandler(erro)
+            errorHandler(erro);
         }
-
     }
 
+    // ⏳ Tela de loading enquanto busca o leito
+    if (loadingPaciente) {
+        return (
+            <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center">
+                <div className="w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full animate-spin mb-4" />
+                <p className="text-gray-600 text-sm">
+                    Carregando informações do leito...
+                </p>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -257,29 +312,20 @@ const PacientesPage = () => {
                                             ? new Date(lastCall.hora).toLocaleString()
                                             : "agora"}
                                     </p>
-                                    <p
-                                        className={"mt-2 text-sm text-yellow-600 font-semibold"}
-                                    >
-                                        {lastCall.status === "PENDENTE" && "Aguardando confirmação da enfermagem..."}
+                                    <p className={"mt-2 text-sm text-yellow-600 font-semibold"}>
+                                        {lastCall.status === "PENDENTE" &&
+                                            "Aguardando confirmação da enfermagem..."}
                                     </p>
-                                    <p
-                                        className={"mt-2 text-sm text-green-600 font-semibold"}
-                                    >
-                                        {lastCall.status === "EM ATENDIMENTO"
-                                            && "Enfermeira confirmou o atendimento ✅"}
+                                    <p className={"mt-2 text-sm text-green-600 font-semibold"}>
+                                        {lastCall.status === "EM ATENDIMENTO" &&
+                                            "Enfermeira confirmou o atendimento ✅"}
                                     </p>
-                                    <p
-                                        className={"mt-2 text-sm text-green-600 font-semibold"}
-                                    >
-                                        {lastCall.status === "CONCLUIDO"
-                                            && "Chamado finalizado com sucesso ✅"}
-
+                                    <p className={"mt-2 text-sm text-green-600 font-semibold"}>
+                                        {lastCall.status === "CONCLUIDO" &&
+                                            "Chamado finalizado com sucesso ✅"}
                                     </p>
-                                    <p
-                                        className={"mt-2 text-sm text-green-600 font-semibold"}
-                                    >
-                                        {lastCall.status === "CANCELADO"
-                                            && "Chamado cancelado ❌"}
+                                    <p className={"mt-2 text-sm text-green-600 font-semibold"}>
+                                        {lastCall.status === "CANCELADO" && "Chamado cancelado ❌"}
                                     </p>
                                     {lastCall.status === "PENDENTE" && lastCall.chamadoId && (
                                         <div className="mt-3">
@@ -307,7 +353,6 @@ const PacientesPage = () => {
                                             </p>
                                         </div>
                                     )}
-
                                 </>
                             ) : (
                                 <>
@@ -326,7 +371,11 @@ const PacientesPage = () => {
                             <div className="grid grid-rows-1 gap-4">
                                 <button
                                     className="flex flex-row items-center justify-center gap-1 rounded-lg shadow-md p-6 bg-green-600 hover:bg-green-700 text-white disabled:bg-green-400 disabled:cursor-not-allowed"
-                                    disabled={lastCall.status === "PENDENTE" || lastCall.status === "EM ATENDIMENTO"}
+                                    disabled={
+                                        lastCall.status === "PENDENTE" ||
+                                        lastCall.status === "EM ATENDIMENTO" ||
+                                        disabled
+                                    }
                                     onClick={handleOpenCall}
                                 >
                                     <SlCallOut className="w-10 h-10" />
@@ -348,6 +397,7 @@ const PacientesPage = () => {
                             </div>
                         </section>
                     </main>
+
                     {showCallForm && (
                         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
                             <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 flex flex-col gap-4">
@@ -358,34 +408,39 @@ const PacientesPage = () => {
                                     Selecione a prioridade e, se quiser, descreva o motivo.
                                 </p>
 
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => setSelectedPriority("ALTA")}
-                                        className={`flex-1 py-2 rounded-lg text-white font-semibold ${selectedPriority === "ALTA"
-                                            ? "bg-red-500"
-                                            : "bg-red-300 hover:bg-red-400"
-                                            }`}
-                                    >
-                                        ALTA
-                                    </button>
-                                    <button
-                                        onClick={() => setSelectedPriority("MEDIA")}
-                                        className={`flex-1 py-2 rounded-lg text-white font-semibold ${selectedPriority === "MEDIA"
-                                            ? "bg-yellow-500"
-                                            : "bg-yellow-300 hover:bg-yellow-400"
-                                            }`}
-                                    >
-                                        MÉDIA
-                                    </button>
-                                    <button
-                                        onClick={() => setSelectedPriority("BAIXA")}
-                                        className={`flex-1 py-2 rounded-lg text-white font-semibold ${selectedPriority === "BAIXA"
-                                            ? "bg-blue-500"
-                                            : "bg-blue-300 hover:bg-blue-400"
-                                            }`}
-                                    >
-                                        BAIXA
-                                    </button>
+                                <div className="grid grid-cols-3 gap-2">
+                                    {tiposChamados.map((item) => {
+                                        const isSelected = selectedChamado?.tipo === item.tipo;
+
+                                        return (
+                                            <button
+                                                key={item.tipo}
+                                                onClick={() => setSelectedChamado(item)}
+                                                className={`
+                                                    flex-1 py-2 rounded-lg text-white font-semibold text-xs sm:text-sm
+                                                    transition transform
+                                                    ${item.tipo === "AGUA"
+                                                        ? "bg-blue-500"
+                                                        : item.tipo === "SOS"
+                                                            ? "bg-red-500"
+                                                            : item.tipo === "DORES"
+                                                                ? "bg-orange-500"
+                                                                : item.tipo === "ATENDIMENTO"
+                                                                    ? "bg-yellow-500"
+                                                                    : item.tipo === "ALIMENTACAO"
+                                                                        ? "bg-green-500"
+                                                                        : "bg-cyan-900"
+                                                    }
+                                                     ${isSelected
+                                                        ? "ring-2 ring-offset-2 ring-green-600 scale-105"
+                                                        : "opacity-80 hover:opacity-100"
+                                                    }
+                                                `}
+                                            >
+                                                {item.tipo}
+                                            </button>
+                                        );
+                                    })}
                                 </div>
 
                                 <div className="flex flex-col gap-2">
@@ -396,7 +451,7 @@ const PacientesPage = () => {
                                         value={observation}
                                         onChange={(e) => setObservation(e.target.value)}
                                         className="w-full border rounded-lg px-3 py-2 text-sm min-h-[80px] outline-none focus:ring-2 focus:ring-green-500"
-                                        placeholder="Ex: dor, tontura, ajuda para ir ao banheiro..."
+                                        placeholder="Insira mais detalhes da sua necessidade..."
                                     />
                                 </div>
 
@@ -405,6 +460,7 @@ const PacientesPage = () => {
                                         onClick={() => {
                                             setShowCallForm(false);
                                             setObservation("");
+                                            setSelectedChamado(undefined);
                                         }}
                                         className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100"
                                     >
@@ -412,7 +468,8 @@ const PacientesPage = () => {
                                     </button>
                                     <button
                                         onClick={handleSendCall}
-                                        className="px-4 py-2 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700"
+                                        disabled={!selectedChamado}
+                                        className="px-4 py-2 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700 disabled:bg-green-300 disabled:cursor-not-allowed"
                                     >
                                         Enviar chamado
                                     </button>
@@ -426,8 +483,8 @@ const PacientesPage = () => {
                     <h2 className="text-2xl font-semibold text-gray-700 mb-4">
                         Nenhum leito associado
                     </h2>
-                    <p className="text-gray-600">
-                        Por favor, entre em contato com alguma Enfermeira para mais
+                    <p className="text-gray-600 p-4">
+                        Por favor, entre em contato com algum enfermeiro para mais
                         informações.
                     </p>
                 </div>

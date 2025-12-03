@@ -1,10 +1,12 @@
+import { userType } from "@shared/context/user/userType";
+
 type LoginInputDto = {
 	usuario: string;
 	senha: string;
 };
 
 type LoginOutputDto = {
-	usuario: { id: number; login: string; perfil: string; };
+	usuario: userType;
 	token: string;
 };
 

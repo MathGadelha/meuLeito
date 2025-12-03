@@ -138,7 +138,7 @@ function QRGenerator() {
                                             <input type="color" value={fg} onChange={(e) => setFg(e.target.value)} style={{ width: "100%" }} />
                                         </div>
                                         <QRCodeCanvas
-                                            value={"https://app-meuleito.com/paciente/" + leitoSelected.Id}
+                                            value={"https://app-meuleito.com.br/paciente/" + leitoSelected.Id}
                                             size={310}
                                             level={"H"}
                                             fgColor={fg}

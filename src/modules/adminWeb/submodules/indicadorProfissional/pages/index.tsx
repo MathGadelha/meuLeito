@@ -15,44 +15,27 @@ import {
     ResponsiveContainer,
 } from "recharts";
 import { FilterOptions } from "@shared/types/filterOptions";
-import { DataTable } from "@components/dataTable";
-import { ActionButton } from "@components/types/ActionButton";
-import { columnsChamados } from "../components/chamadosTableColumns";
-import { chamadosData } from "../types/chamados.dto";
-import { useChamadosEnfermeiros } from "../services/getChamadosEnfermeiros/getChamadosEnfermeiros.service";
-import { usePagination } from "@shared/hooks/pagination/usePagination";
-import { TiThMenu } from "react-icons/ti";
-import { ChamadoSheet } from "../components/sheetChamado";
-import { Pagination } from "@components/dataTable/pagination";
+import dayjs from "dayjs";
+import { useChamadosIntervalo } from "../services/getChamadosIntervalo/getChamadosIntervalo.service";
+import { chamadosIntervaloOutPut } from "../services/getChamadosIntervalo/getChamadosIntervalo.dto";
+import { useChamadosTipo } from "../services/getChamadosTipo/getChamadosTipo.service";
+import { chamadosTipoOutPut } from "../services/getChamadosTipo/getChamadosTipo.dto";
 
 const IndicadorProfissionalPage = () => {
 
     const [dados, setDados] = useState<visaoOutput>({} as visaoOutput)
     const [idSetor, setIdSetor] = useState<number>();
     const [setores, setSetores] = useState<FilterOptions[]>([]);
-    const [chamados, setChamados] = useState<chamadosData[]>([])
-    const [loading, setLoading] = useState(false)
-    const [openSheetChamado, setOpenSheetChamado] = useState(false)
-    const { pageInfo, handleNextPage, handlePreviousPage } = usePagination()
-    const [chamadoSelected, setChamadoSelect] = useState<chamadosData>({} as chamadosData)
+    // const [loading, setLoading] = useState(false);
+    // const [dadosSetor, setDadosSetor] = useState<chamadosSetorOutPut>()
+    const [dadosIntervalo, setDadosIntervalo] = useState<chamadosIntervaloOutPut[]>([])
+    const [dadosTipo, setDadosTipo] = useState<chamadosTipoOutPut[]>([])
 
     const dadosTeste = [
         { status: "Abertos", qtd: dados.pendentes },
         { status: "Em atendimento", qtd: dados.aceitos },
         { status: "Concluídos", qtd: dados.concluidos },
         { status: "Cancelados", qtd: dados.cancelados },
-    ];
-    const actionButton: ActionButton[] = [
-        {
-            label: "Editar profissional",
-            icon: <TiThMenu size={20} />,
-            onClick: (row: chamadosData) => {
-                // setIsOpenUserDialog(true);
-                // setProfissionalSeleted(row);
-                setOpenSheetChamado(true)
-                setChamadoSelect(row)
-            },
-        },
     ];
 
 
@@ -63,6 +46,48 @@ const IndicadorProfissionalPage = () => {
             }
             const result = await useVisaoGeral.execute(params)
             setDados(result)
+        } catch (error) {
+            errorHandler(error)
+        }
+    }
+
+    // async function getChamadosSetor() {
+    //     try {
+    //         const params = {
+    //             init: dayjs().format("YYYY-MM-DD"),
+    //             fim: dayjs().format("YYYY-MM-DD"),
+    //             id_setor: idSetor!
+    //         }
+    //         const result = await useChamadosSetor.execute(params)
+    //         setDadosSetor(result)
+    //     } catch (error) {
+    //         errorHandler(error)
+    //     }
+    // }
+
+    async function getChamadosIntervalo() {
+        try {
+            const params = {
+                init: dayjs().format("YYYY-MM-DD"),
+                fim: dayjs().format("YYYY-MM-DD"),
+                id_setor: idSetor!
+            }
+            const result = await useChamadosIntervalo.execute(params)
+            setDadosIntervalo(result)
+        } catch (error) {
+            errorHandler(error)
+        }
+    }
+
+    async function getChamadosTipo() {
+        try {
+            const params = {
+                init: dayjs().format("YYYY-MM-DD"),
+                fim: dayjs().format("YYYY-MM-DD"),
+                id_setor: idSetor!
+            }
+            const result = await useChamadosTipo.execute(params)
+            setDadosTipo(result)
         } catch (error) {
             errorHandler(error)
         }
@@ -86,21 +111,21 @@ const IndicadorProfissionalPage = () => {
         }
     }
 
-    async function getChamadosEnfermeiros() {
-        try {
-            setLoading(true)
-            const params = {
-                page: pageInfo.value.page,
-                pageSize: 10
-            }
-            const result = await useChamadosEnfermeiros.execute(params)
-            setChamados(result.data)
-        } catch (error) {
-            errorHandler(error)
-        } finally {
-            setLoading(false)
-        }
-    }
+    // async function getChamadosEnfermeiros() {
+    //     try {
+    //         setLoading(true)
+    //         const params = {
+    //             page: pageInfo.value.page,
+    //             pageSize: 10
+    //         }
+    //         const result = await useChamadosEnfermeiros.execute(params)
+    //         setChamados(result.data)
+    //     } catch (error) {
+    //         errorHandler(error)
+    //     } finally {
+    //         setLoading(false)
+    //     }
+    // }
 
 
     useEffect(() => {
@@ -109,12 +134,14 @@ const IndicadorProfissionalPage = () => {
         }, 750);
 
         return () => clearTimeout(debounce);
-    }, [idSetor, pageInfo.value.page])
+    }, [idSetor])
 
     useEffect(() => {
         getVisaoGeral()
         listSetores()
-        getChamadosEnfermeiros()
+        // getChamadosSetor()
+        getChamadosIntervalo()
+        getChamadosTipo()
     }, [])
 
     return (
@@ -136,6 +163,14 @@ const IndicadorProfissionalPage = () => {
                         {
                             value: dados.pendentes,
                             label: "Chamados pendentes",
+                        },
+                        {
+                            value: dados.concluidos,
+                            label: "Chamados concluídos",
+                        },
+                        {
+                            value: dados.cancelados,
+                            label: "Chamados cancelados",
                         },
                     ]}
                 />
@@ -159,34 +194,12 @@ const IndicadorProfissionalPage = () => {
                     },
                 ]}
             />
-            <section className="flex justify-center items-center grid grid-cols-1 lg:grid-cols-2 gap-6 my-5">
-                <div className="rounded-2xl border border-slate-800 p-4">
+            <section className="w-full flex justify-center items-center my-5">
+                <div className="w-full rounded-2xl border border-slate-800 p-4">
                     <h2 className="text-lg font-semibold mb-4">
-                        Chamados por status
+                        Chamados por setor
                     </h2>
-                    <div className="h-64">
-                        <ResponsiveContainer className="bg-white" width="100%" height="100%">
-                            <BarChart data={dadosTeste} >
-                                <XAxis dataKey="status" stroke="#1e293b" />
-                                <YAxis stroke="#1e293b" />
-                                <Tooltip
-                                    contentStyle={{
-                                        backgroundColor: "#FFF",
-                                        border: "1px solid #1e293b",
-                                        borderRadius: 8,
-                                        color: "#1e293b",
-                                    }}
-                                />
-                                <Bar dataKey="qtd" fill="#136f63" radius={[8, 8, 0, 0]} />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </div>
-                </div>
-                <div className="rounded-2xl border border-slate-800 p-4">
-                    <h2 className="text-lg font-semibold mb-4">
-                        Chamados por enfermeiro
-                    </h2>
-                    <div className="h-64">
+                    <div className="w-full h-64">
                         <ResponsiveContainer className="bg-white" width="100%" height="100%">
                             <BarChart data={dadosTeste} >
                                 <XAxis dataKey="status" stroke="#1e293b" />
@@ -205,19 +218,52 @@ const IndicadorProfissionalPage = () => {
                     </div>
                 </div>
             </section>
-            <div className="flex flex-col p-4 gap-4">
-                <p className="font-semibold text-xl">Lista de chamados</p>
-                <DataTable
-                    actions={actionButton}
-                    columns={columnsChamados}
-                    data={chamados}
-                    isLoading={loading}
-                />
-                <Pagination handleNextPage={handleNextPage} handlePreviousPage={handlePreviousPage} />
-            </div>
-            {openSheetChamado &&
-                <ChamadoSheet isOpen={openSheetChamado} onOpenChange={() => setOpenSheetChamado(false)} chamadoSelected={chamadoSelected} />
-            }
+            <section className="flex justify-center items-center grid grid-cols-1 lg:grid-cols-2 gap-6 my-5">
+                <div className="rounded-2xl border border-slate-800 p-4">
+                    <h2 className="text-lg font-semibold mb-4">
+                        Chamados por intervalo de tempo
+                    </h2>
+                    <div className="h-64">
+                        <ResponsiveContainer className="bg-white" width="100%" height="100%">
+                            <BarChart data={dadosIntervalo} >
+                                <XAxis dataKey="label" stroke="#1e293b" />
+                                <YAxis stroke="#1e293b" />
+                                <Tooltip
+                                    contentStyle={{
+                                        backgroundColor: "#FFF",
+                                        border: "1px solid #1e293b",
+                                        borderRadius: 8,
+                                        color: "#1e293b",
+                                    }}
+                                />
+                                <Bar dataKey="total" fill="#136f63" radius={[8, 8, 0, 0]} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+                <div className="rounded-2xl border border-slate-800 p-4">
+                    <h2 className="text-lg font-semibold mb-4">
+                        Chamados por tipo
+                    </h2>
+                    <div className="h-64">
+                        <ResponsiveContainer className="bg-white" width="100%" height="100%">
+                            <BarChart data={dadosTipo} >
+                                <XAxis dataKey="tipo" stroke="#1e293b" />
+                                <YAxis stroke="#1e293b" />
+                                <Tooltip
+                                    contentStyle={{
+                                        backgroundColor: "#FFF",
+                                        border: "1px solid #1e293b",
+                                        borderRadius: 8,
+                                        color: "#1e293b",
+                                    }}
+                                />
+                                <Bar dataKey="total" fill="#136f63" radius={[8, 8, 0, 0]} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+            </section>
         </AdminWebLayout>
     );
 };
