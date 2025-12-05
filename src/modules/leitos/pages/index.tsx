@@ -23,7 +23,7 @@ const LeitosPage = () => {
 	);
 	const [setores, setSetores] = useState<FilterOptions[]>([]);
 	const [leitos, setLeitos] = useState<leitosAdmin[]>([]);
-	const [loading, setLoading] = useState(false);
+	const [loading, setLoading] = useState(true);
 	const [idSetor, setIdSetor] = useState<number>();
 	const [ocupados, setOcupados] = useState<number>();
 	const [livres, setLivres] = useState<number>();
@@ -93,11 +93,7 @@ const LeitosPage = () => {
 	}, [])
 
 	useEffect(() => {
-		const debounce = setTimeout(() => {
-			listLeitos();
-		}, 750);
-
-		return () => clearTimeout(debounce);
+		listLeitos();
 	}, [idSetor])
 
 	return (
@@ -148,13 +144,23 @@ const LeitosPage = () => {
 						/>)
 					}
 				</div>
+				{loading ? (
+					<div className="flex flex-col items-center justify-center">
+						<div className="w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full animate-spin mb-4" />
+						<p className="text-gray-600 text-sm">
+							Carregando chamados...
+						</p>
+					</div>
+				) : (
+					<DataTable
+						actions={actionButton}
+						columns={columnsLeitos}
+						data={leitos}
+						isLoading={loading}
+					/>
+				)
+				}
 
-				<DataTable
-					actions={actionButton}
-					columns={columnsLeitos}
-					data={leitos}
-					isLoading={loading}
-				/>
 			</div>
 			{isOpenLeitoDialog && (
 				<LeitoDialog

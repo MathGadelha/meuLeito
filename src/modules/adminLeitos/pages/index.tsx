@@ -23,7 +23,7 @@ const LeitosAdminPage = () => {
     );
     const [leitos, setLeitos] = useState<leitosAdmin[]>([]);
     const [tipo, setTipo] = useState<"C" | "E">("C");
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
     const [setores, setSetores] = useState<FilterOptions[]>([]);
     const [idSetor, setIdSetor] = useState<number>();

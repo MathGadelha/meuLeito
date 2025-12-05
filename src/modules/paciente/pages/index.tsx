@@ -265,13 +265,14 @@ const PacientesPage = () => {
     async function handleFinishCall() {
         if (finishing) return;
         if (!lastCall.chamadoId || !pacienteLeito.IdSetor) return;
-
+        setFinishing(true);
         try {
             await finishChamado.execute(lastCall.chamadoId.toString());
-            setFinishing(true);
             getUltimoChamado();
         } catch (erro) {
             errorHandler(erro);
+        } finally {
+            setFinishing(false);
         }
     }
 
