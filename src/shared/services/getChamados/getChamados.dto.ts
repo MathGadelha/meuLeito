@@ -12,6 +12,7 @@ type chamadoData = {
     pacienteLeitoId?: number;
     prioridade?: string | null;
     mensagem?: string | null;
+    tipo?: string;
     hora?: string;
     nomePaciente?: string;
     nomeLeito?: string;

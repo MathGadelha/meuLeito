@@ -116,6 +116,7 @@ const Layout = ({
 				hora: data.hora,
 				nomePaciente: data.NomePaciente,
 				nomeLeito: data.NomeLeito,
+				tipo: data.tipo
 			};
 
 			setNotifications((prev) => [newNotif, ...prev]);
@@ -340,11 +341,21 @@ const Layout = ({
 											`${notif.nomePaciente ?? "?"}`}
 									</p>
 									<p>
+										Tipo: {notif.tipo}
+									</p>
+									<p>
 										Leito: {notif.nomeLeito || notif.pacienteLeitoId || "—"}
 									</p>
 									{notif.mensagem && <p>{notif.mensagem}</p>}
 									{notif.prioridade && (
-										<p className="text-xs text-red-500">
+										<p className={`${notif.prioridade === "ALTA"
+											? "text-red-500"
+											: notif.prioridade === "MEDIA"
+												? "text-yellow-500"
+												: notif.prioridade === "BAIXA"
+													? "text-green-500"
+													: "text-cyan-900"
+											}`}>
 											Prioridade: {notif.prioridade}
 										</p>
 									)}
