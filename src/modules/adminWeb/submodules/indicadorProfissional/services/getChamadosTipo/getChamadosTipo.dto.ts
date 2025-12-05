@@ -1,7 +1,7 @@
 type chamadosTipoInput = {
-    init: string;
-    fim: string;
-    id_setor: number;
+    init?: string;
+    fim?: string;
+    id_setor?: number;
 }
 
 

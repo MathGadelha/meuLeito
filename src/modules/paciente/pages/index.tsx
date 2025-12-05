@@ -32,8 +32,8 @@ const PacientesPage = () => {
     const [selectedChamado, setSelectedChamado] = useState<chamadoTipos>();
     const [observation, setObservation] = useState("");
 
-    // 🔄 Loading enquanto getPacienteLeito roda
     const [loadingPaciente, setLoadingPaciente] = useState(true);
+    const [disableChamado, setDisableChamado] = useState(false)
 
     const tiposChamados = [
         {
@@ -196,8 +196,9 @@ const PacientesPage = () => {
     };
 
     const handleSendCall = () => {
+        disableButtom()
         if (!pacienteLeito.IdPaciente || !pacienteLeito.IdSetor) return;
-        if (!selectedChamado) return; // garante que selecionou um tipo
+        if (!selectedChamado) return;
 
         const payload = {
             id_paciente_leito: pacienteLeito.Id,
@@ -221,6 +222,16 @@ const PacientesPage = () => {
 
         socket.emit("novo_chamado", payload);
     };
+
+    function disableButtom() {
+        setDisableChamado(true)
+
+        const debounce = setTimeout(() => {
+            setDisableChamado(false)
+        }, 750);
+
+        return () => clearTimeout(debounce);
+    }
 
     async function handleCancelCall() {
         if (canceling) return;
@@ -301,10 +312,10 @@ const PacientesPage = () => {
                             {lastCall.status ? (
                                 <>
                                     <p className="text-gray-600">
-                                        Observação: {lastCall.mensagem || "—"}
+                                        Pedido: {lastCall.tipo || "—"}
                                     </p>
                                     <p className="text-gray-600">
-                                        Prioridade: {lastCall.prioridade || "—"}
+                                        Observação: {lastCall.mensagem || "—"}
                                     </p>
                                     <p className="mt-2 text-sm text-gray-500">
                                         Último chamado aberto:{" "}
@@ -468,7 +479,7 @@ const PacientesPage = () => {
                                     </button>
                                     <button
                                         onClick={handleSendCall}
-                                        disabled={!selectedChamado}
+                                        disabled={!selectedChamado || disableChamado}
                                         className="px-4 py-2 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700 disabled:bg-green-300 disabled:cursor-not-allowed"
                                     >
                                         Enviar chamado

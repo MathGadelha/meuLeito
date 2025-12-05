@@ -10,6 +10,7 @@ type chamadosEnfermeirosOutPut = {
     data: chamadosData[]
     page: number;
     pageSize: number;
+    total: number;
 }
 
 export type { chamadosEnfermeirosInput, chamadosEnfermeirosOutPut }

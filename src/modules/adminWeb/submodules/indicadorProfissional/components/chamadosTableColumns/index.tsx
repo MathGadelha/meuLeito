@@ -7,7 +7,7 @@ dayjs.extend(duration);
 const columnsChamados: ColumnDef<chamadosData>[] = [
 	{
 		accessorKey: "nome",
-		header: "Nome",
+		header: "Nome do enfermeiro(a)",
 		cell: ({ row }) => {
 			const value = row.original.nome;
 			return <p>{value}</p>;

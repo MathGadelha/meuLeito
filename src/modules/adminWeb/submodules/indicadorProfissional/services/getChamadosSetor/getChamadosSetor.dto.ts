@@ -1,14 +1,14 @@
-import { chamadosData } from "../../types/chamados.dto"
-
 type chamadosSetorInput = {
-    init: string;
-    fim: string;
-    id_setor: number;
+    init?: string;
+    fim?: string;
+    id_setor?: number;
 }
 
 
 type chamadosSetorOutPut = {
-    data: chamadosData[]
+    id_setor: number;
+    nome_setor: string;
+    total: number;
 }
 
 export type { chamadosSetorInput, chamadosSetorOutPut }

@@ -5,8 +5,8 @@ import { chamadosSetorInput, chamadosSetorOutPut } from "./getChamadosSetor.dto"
 class ChamadosSetor {
     constructor(private readonly api: AxiosInstance) { }
 
-    async execute(params?: chamadosSetorInput): Promise<chamadosSetorOutPut> {
-        const response = await this.api.get<chamadosSetorOutPut>("/kpis/intervalos-chamados", { params });
+    async execute(params?: chamadosSetorInput): Promise<chamadosSetorOutPut[]> {
+        const response = await this.api.get<chamadosSetorOutPut[]>("/kpis/chamados-setores", { params });
 
         return response.data;
     }
